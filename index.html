@@ -4,238 +4,397 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LogistikPRO - Monitoring Logistik Proyek</title>
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
+    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS (XLSX) untuk Export Excel -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Custom scrollbar & mobile adjustments */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .table-res th, .table-res td { white-space: nowrap; }
+        /* Custom scrollbar & resizable table styles */
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #cbd5e1; /* Garis kolom tegas */
+            position: relative;
+        }
+        .resizer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            cursor: col-resize;
+            user-select: none;
+            touch-action: none;
+            height: 100%;
+        }
+        .resizer:hover, .resizing {
+            background-color: #3b82f6;
+        }
+        @media print {
+            body { background: white; }
+            .no-print { display: none !important; }
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans pb-20 md:pb-5">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
-    <!-- HEADER / NAVIGATION -->
-    <header class="bg-slate-900 text-white shadow sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+    <!-- HEADER / NAVBAR -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex items-center justify-between w-full md:w-auto">
                 <div class="flex items-center space-x-2">
-                    <div class="bg-blue-600 p-2 rounded-lg text-white">
-                        <i class="fa-solid fa-boxes-stacked text-xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-lg font-bold tracking-wide">LogistikPRO</h1>
-                        <p class="text-xs text-slate-400">Monitoring & Inventaris Proyek</p>
-                    </div>
+                    <i data-lucide="box" class="w-7 h-7 text-blue-400"></i>
+                    <span class="text-xl font-bold tracking-wide">LogistikPRO</span>
                 </div>
                 <!-- Mobile Menu Button -->
-                <button id="mobileMenuBtn" class="md:hidden text-slate-300 hover:text-white focus:outline-none">
-                    <i class="fa-solid fa-bars text-xl"></i>
+                <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-white focus:outline-none">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
             </div>
-            
-            <!-- Desktop Nav -->
-            <nav id="mainNav" class="hidden md:flex flex-wrap items-center gap-2 mt-3 md:mt-0">
-                <button onclick="switchTab('dashboard')" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition bg-blue-600 text-white" data-target="dashboard">
-                    <i class="fa-solid fa-chart-pie mr-1.5"></i> Dashboard
+
+            <!-- Navigasi Menu Header -->
+            <nav id="nav-menu" class="hidden md:flex flex-wrap items-center gap-1 sm:gap-2 text-sm font-medium w-full md:w-auto justify-center">
+                <button onclick="switchTab('dashboard')" class="nav-btn px-3 py-2 rounded-lg bg-blue-600 text-white transition flex items-center gap-1.5 w-full md:w-auto justify-center">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
                 </button>
-                <button onclick="switchTab('spp')" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" data-target="spp">
-                    <i class="fa-solid fa-file-invoice mr-1.5"></i> Permintaan (SPP)
+                <button onclick="switchTab('spp')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 transition flex items-center gap-1.5 w-full md:w-auto justify-center">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> SPP & Realisasi
                 </button>
-                <button onclick="switchTab('masuk')" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" data-target="masuk">
-                    <i class="fa-solid fa-truck-ramp-box mr-1.5"></i> Barang Masuk
+                <button onclick="switchTab('barang-masuk')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 transition flex items-center gap-1.5 w-full md:w-auto justify-center">
+                    <i data-lucide="truck" class="w-4 h-4"></i> Barang Masuk
                 </button>
-                <button onclick="switchTab('stok')" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" data-target="stok">
-                    <i class="fa-solid fa-warehouse mr-1.5"></i> Stok & Kartu
+                <button onclick="switchTab('stok-barang')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 transition flex items-center gap-1.5 w-full md:w-auto justify-center">
+                    <i data-lucide="archive" class="w-4 h-4"></i> Stok & Pengeluaran
                 </button>
-                <button onclick="switchTab('retur')" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" data-target="retur">
-                    <i class="fa-solid fa-rotate-left mr-1.5"></i> Retur / Keluar
-                </button>
-                <div class="flex items-center gap-1 ml-2 border-l border-slate-700 pl-2">
-                    <button onclick="exportData()" title="Backup Data JSON" class="p-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-lg text-sm"><i class="fa-solid fa-download"></i></button>
-                    <label title="Restore Data JSON" class="p-2 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg text-sm cursor-pointer"><i class="fa-solid fa-upload"></i><input type="file" id="importFile" class="hidden" onchange="importData(event)"></label>
-                </div>
             </nav>
+
+            <!-- Aksi Header: Export/Import, Share, Link Download -->
+            <div class="flex items-center flex-wrap gap-2 justify-center w-full md:w-auto">
+                <button onclick="exportJSON()" title="Export JSON" class="bg-slate-800 hover:bg-slate-700 text-xs px-2.5 py-1.5 rounded flex items-center gap-1 border border-slate-700">
+                    <i data-lucide="download" class="w-3.5 h-3.5 text-green-400"></i> Export JSON
+                </button>
+                <label title="Import JSON" class="bg-slate-800 hover:bg-slate-700 text-xs px-2.5 py-1.5 rounded flex items-center gap-1 border border-slate-700 cursor-pointer">
+                    <i data-lucide="upload" class="w-3.5 h-3.5 text-amber-400"></i> Import JSON
+                    <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
+                </label>
+                <button onclick="exportExcelMultiSheet()" title="Export ke Excel (CSV Multi-Sheet)" class="bg-emerald-700 hover:bg-emerald-600 text-xs px-2.5 py-1.5 rounded flex items-center gap-1">
+                    <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Export Excel
+                </button>
+                <button onclick="openShareModal()" title="Bagikan & Kolaborasi" class="bg-blue-600 hover:bg-blue-500 text-xs px-2.5 py-1.5 rounded flex items-center gap-1 font-semibold">
+                    <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Share
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-7xl mx-auto px-4 py-6">
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6">
 
-        <!-- 1. TAB DASHBOARD -->
+        <!-- ================= TAB 1: DASHBOARD ================= -->
         <section id="tab-dashboard" class="space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total SPP</p>
-                        <h3 id="statTotalSPP" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
-                    </div>
-                    <div class="bg-blue-50 text-blue-600 p-3 rounded-lg"><i class="fa-solid fa-file-lines text-xl"></i></div>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Dashboard Interaktif</h1>
+                    <p class="text-sm text-slate-500">Sinkronisasi real-time data logistik proyek</p>
                 </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Barang Masuk</p>
-                        <h3 id="statTotalMasuk" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
-                    </div>
-                    <div class="bg-emerald-50 text-emerald-600 p-3 rounded-lg"><i class="fa-solid fa-truck text-xl"></i></div>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Jenis Item Stok</p>
-                        <h3 id="statTotalItem" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
-                    </div>
-                    <div class="bg-indigo-50 text-indigo-600 p-3 rounded-lg"><i class="fa-solid fa-boxes-stacked text-xl"></i></div>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Retur / Keluar</p>
-                        <h3 id="statTotalRetur" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
-                    </div>
-                    <div class="bg-rose-50 text-rose-600 p-3 rounded-lg"><i class="fa-solid fa-rotate-left text-xl"></i></div>
-                </div>
+                <button onclick="refreshData()" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded text-sm flex items-center gap-1.5 shadow-sm">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh Data
+                </button>
             </div>
 
-            <!-- Chart & Quick Info -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 lg:col-span-2">
-                    <h3 class="font-bold text-slate-800 mb-4 flex items-center"><i class="fa-solid fa-chart-simple mr-2 text-blue-600"></i> Grafik Ringkasan Aktivitas Logistik</h3>
-                    <div class="h-64 sm:h-80 relative flex items-center justify-center">
-                        <canvas id="summaryChart"></canvas>
-                    </div>
-                </div>
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
-                    <div>
-                        <h3 class="font-bold text-slate-800 mb-2 flex items-center"><i class="fa-solid fa-circle-info mr-2 text-blue-600"></i> Informasi Sistem</h3>
-                        <p class="text-sm text-slate-600 mb-4">Aplikasi mandiri untuk pengelolaan logistik proyek. Semua input barang bersifat manual teks bebas agar Anda dapat memasukkan material apa saja tanpa batas.</p>
-                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2 text-xs text-slate-600">
-                            <div class="flex justify-between"><span>Status Penyimpanan:</span> <span class="font-semibold text-emerald-600">Aktif (Local)</span></div>
-                            <div class="flex justify-between"><span>Versi Sistem:</span> <span class="font-semibold">3.0 (Text Input)</span></div>
+            <!-- 4 Panel Utama -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Panel SPP -->
+                <div onclick="openDashboardDetail('spp')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:shadow-md hover:border-blue-400 transition group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Permintaan SPP</p>
+                            <h3 id="dash-spp-count" class="text-2xl font-bold text-slate-900 mt-1">0 Item</h3>
+                        </div>
+                        <div class="p-3 bg-blue-50 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
+                            <i data-lucide="file-text" class="w-6 h-6"></i>
                         </div>
                     </div>
-                    <button onclick="resetAllData()" class="mt-4 w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium rounded-lg text-sm transition">
-                        <i class="fa-solid fa-trash-can mr-1"></i> Reset Seluruh Data
-                    </button>
+                    <p class="text-xs text-blue-600 mt-3 font-medium flex items-center gap-1">Klik untuk lihat rincian <i data-lucide="chevron-right" class="w-3 h-3"></i></p>
+                </div>
+
+                <!-- Panel Kekurangan Realisasi -->
+                <div onclick="openDashboardDetail('kekurangan')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:shadow-md hover:border-amber-400 transition group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Kekurangan Realisasi</p>
+                            <h3 id="dash-kurang-count" class="text-2xl font-bold text-amber-600 mt-1">0 Qty</h3>
+                        </div>
+                        <div class="p-3 bg-amber-50 rounded-lg text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition">
+                            <i data-lucide="alert-circle" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-amber-600 mt-3 font-medium flex items-center gap-1">Klik untuk lihat rincian <i data-lucide="chevron-right" class="w-3 h-3"></i></p>
+                </div>
+
+                <!-- Panel Barang Masuk -->
+                <div onclick="openDashboardDetail('masuk')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:shadow-md hover:border-emerald-400 transition group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Barang Masuk</p>
+                            <h3 id="dash-masuk-count" class="text-2xl font-bold text-emerald-600 mt-1">0 Qty</h3>
+                        </div>
+                        <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition">
+                            <i data-lucide="truck" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-emerald-600 mt-3 font-medium flex items-center gap-1">Klik untuk lihat rincian <i data-lucide="chevron-right" class="w-3 h-3"></i></p>
+                </div>
+
+                <!-- Panel Stok Barang -->
+                <div onclick="openDashboardDetail('stok')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:shadow-md hover:border-indigo-400 transition group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Stok Gudang Aktif</p>
+                            <h3 id="dash-stok-count" class="text-2xl font-bold text-indigo-600 mt-1">0 Qty</h3>
+                        </div>
+                        <div class="p-3 bg-indigo-50 rounded-lg text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition">
+                            <i data-lucide="archive" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-indigo-600 mt-3 font-medium flex items-center gap-1">Klik untuk lihat rincian <i data-lucide="chevron-right" class="w-3 h-3"></i></p>
                 </div>
             </div>
-        </section>
 
-        <!-- 2. TAB SPP (Surat Permintaan Pembelian) -->
-        <section id="tab-spp" class="hidden space-y-6">
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-                    <h3 class="font-bold text-slate-800 text-lg"><i class="fa-solid fa-file-invoice mr-2 text-blue-600"></i> Surat Permintaan Pembelian (SPP)</h3>
-                    <button onclick="openModal('spp')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center">
-                        <i class="fa-solid fa-plus mr-1.5"></i> Buat SPP Baru
-                    </button>
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Bar Chart SPP vs Realisasi -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 lg:col-span-2">
+                    <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2 text-sm sm:text-base">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-600"></i> Grafik Status SPP vs Realisasi
+                    </h3>
+                    <div class="relative h-64 sm:h-72">
+                        <canvas id="chartSppRealisasi"></canvas>
+                    </div>
                 </div>
-                <div class="overflow-x-auto table-res border border-slate-200 rounded-lg">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
-                                <th class="p-3">No. SPP</th>
+
+                <!-- Donut Chart Proporsi Stok -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2 text-sm sm:text-base">
+                        <i data-lucide="pie-chart" class="w-5 h-5 text-indigo-600"></i> Proporsi Stok Gudang
+                    </h3>
+                    <div class="relative h-64 sm:h-72 flex items-center justify-center">
+                        <canvas id="chartDonutStok"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel Ringkasan Kekurangan SPP -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-2 text-sm sm:text-base">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500"></i> Ringkasan Kekurangan SPP
+                    </h3>
+                    <span id="badge-ringkasan-kurang" class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-semibold">0 Item Kurang</span>
+                </div>
+                <div class="table-container">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">No SPP</th>
                                 <th class="p-3">Tanggal</th>
-                                <th class="p-3">Pemohon</th>
                                 <th class="p-3">Nama Barang</th>
-                                <th class="p-3">Jumlah</th>
-                                <th class="p-3">Keperluan</th>
-                                <th class="p-3 text-center">Aksi</th>
+                                <th class="p-3">Qty SPP</th>
+                                <th class="p-3">Realisasi</th>
+                                <th class="p-3">Kekurangan</th>
+                                <th class="p-3">Sat</th>
                             </tr>
                         </thead>
-                        <tbody id="tableSPPBody" class="divide-y divide-slate-200">
-                            <!-- Data injected via JS -->
+                        <tbody id="table-ringkasan-body" class="divide-y divide-slate-200">
+                            <!-- Diisi via JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- 3. TAB BARANG MASUK -->
-        <section id="tab-masuk" class="hidden space-y-6">
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-                    <h3 class="font-bold text-slate-800 text-lg"><i class="fa-solid fa-truck-ramp-box mr-2 text-emerald-600"></i> Penerimaan Barang Masuk</h3>
-                    <button onclick="openModal('masuk')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center">
-                        <i class="fa-solid fa-plus mr-1.5"></i> Input Barang Masuk
-                    </button>
+
+        <!-- ================= TAB 2: SPP & REALISASI ================= -->
+        <section id="tab-spp" class="space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Manajemen SPP & Realisasi</h1>
+                    <p class="text-sm text-slate-500">Catat dan pantau surat permintaan pembelian material proyek</p>
                 </div>
-                <div class="overflow-x-auto table-res border border-slate-200 rounded-lg">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
-                                <th class="p-3">Tanggal</th>
-                                <th class="p-3">No. Surat Jalan</th>
-                                <th class="p-3">Nama Barang</th>
-                                <th class="p-3">Jumlah Diterima</th>
-                                <th class="p-3">Supplier / Vendor</th>
+                <button onclick="openModalSPP()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow transition">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Buat SPP Baru
+                </button>
+            </div>
+
+            <!-- Toolbar Pencarian -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-3 justify-between items-center">
+                <div class="w-full sm:w-80 relative">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+                    <input type="text" id="search-spp" oninput="renderTableSPP()" placeholder="Cari berdasarkan No SPP..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="text-xs text-slate-500">
+                    Total Data SPP: <span id="count-total-spp" class="font-bold text-slate-800">0</span>
+                </div>
+            </div>
+
+            <!-- Tabel SPP & Realisasi -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="table-container">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">No SPP <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Tgl SPP <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Pengaju <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Nama Barang <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Spesifikasi <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Qty <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Sat <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Realisasi Bertahap <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Total Realisasi <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Status <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Keterangan <div class="resizer" onmousedown="initResize(event)"></div></th>
                                 <th class="p-3 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="tableMasukBody" class="divide-y divide-slate-200">
-                            <!-- Data injected via JS -->
+                        <tbody id="table-spp-body" class="divide-y divide-slate-200">
+                            <!-- Diisi via JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- 4. TAB STOK & KARTU -->
-        <section id="tab-stok" class="hidden space-y-6">
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-                    <h3 class="font-bold text-slate-800 text-lg"><i class="fa-solid fa-warehouse mr-2 text-indigo-600"></i> Stok Gudang & Kartu Kendali</h3>
-                    <button onclick="exportExcelStok()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center">
-                        <i class="fa-solid fa-file-excel mr-1.5"></i> Export ke Excel
+
+        <!-- ================= TAB 3: BARANG MASUK ================= -->
+        <section id="tab-barang-masuk" class="space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Barang Masuk & Vendor</h1>
+                    <p class="text-sm text-slate-500">Pencatatan material masuk dari supplier/vendor proyek</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="openModalVendorAkumulasi()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow transition">
+                        <i data-lucide="layers" class="w-4 h-4"></i> Akumulasi Vendor
+                    </button>
+                    <button onclick="openModalBarangMasuk()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow transition">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Input Barang Masuk
                     </button>
                 </div>
-                <div class="overflow-x-auto table-res border border-slate-200 rounded-lg">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
-                                <th class="p-3">No</th>
-                                <th class="p-3">Nama Barang / Material</th>
-                                <th class="p-3">Total Masuk</th>
-                                <th class="p-3">Total Keluar / Retur</th>
-                                <th class="p-3 font-bold text-indigo-600">Stok Saat Ini</th>
+            </div>
+
+            <!-- Toolbar Pencarian -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-3 justify-between items-center">
+                <div class="w-full sm:w-80 relative">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+                    <input type="text" id="search-vendor" oninput="renderTableBarangMasuk()" placeholder="Cari berdasarkan Nama Vendor..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div class="text-xs text-slate-500">
+                    Total Item Masuk: <span id="count-total-masuk" class="font-bold text-slate-800">0</span>
+                </div>
+            </div>
+
+            <!-- Tabel Barang Masuk -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="table-container">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">Tanggal <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Nama Vendor <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Nama Barang <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Spesifikasi <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Qty <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Sat <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Harsat (Rp) <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Total Harga (Rp) <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Keterangan <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="tableStokBody" class="divide-y divide-slate-200">
-                            <!-- Data injected via JS -->
+                        <tbody id="table-barang-masuk-body" class="divide-y divide-slate-200">
+                            <!-- Diisi via JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- 5. TAB RETUR / KELUAR -->
-        <section id="tab-retur" class="hidden space-y-6">
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-                    <h3 class="font-bold text-slate-800 text-lg"><i class="fa-solid fa-rotate-left mr-2 text-rose-600"></i> Retur & Pengeluaran Barang</h3>
-                    <button onclick="openModal('retur')" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center">
-                        <i class="fa-solid fa-plus mr-1.5"></i> Input Keluar / Retur
-                    </button>
+
+        <!-- ================= TAB 4: STOK BARANG & PENGELUARAN ================= -->
+        <section id="tab-stok-barang" class="space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Stok Gudang & Pengeluaran</h1>
+                    <p class="text-sm text-slate-500">Sinkronisasi otomatis stok masuk dan pencatatan pengambilan harian</p>
                 </div>
-                <div class="overflow-x-auto table-res border border-slate-200 rounded-lg">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
-                                <th class="p-3">Tanggal</th>
-                                <th class="p-3">Nama Barang</th>
-                                <th class="p-3">Jumlah</th>
-                                <th class="p-3">Keterangan / Tujuan</th>
+                <button onclick="openModalBarangKeluar()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow transition">
+                    <i data-lucide="minus-circle" class="w-4 h-4"></i> Input Pengambilan Barang
+                </button>
+            </div>
+
+            <!-- TABEL 1: STOK BARANG GUDANG -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-2 text-sm sm:text-base">
+                        <i data-lucide="archive" class="w-5 h-5 text-indigo-600"></i> Rekapitulasi Saldo Stok Gudang
+                    </h3>
+                    <span class="text-xs text-slate-500">Tersinkronisasi otomatis dengan Barang Masuk & Keluar</span>
+                </div>
+                <div class="table-container">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">Tgl Masuk <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Nama Barang <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Spesifikasi <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Sat <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Total Masuk <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Total Keluar <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Saldo Akhir <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3 text-center">Status Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-stok-gudang-body" class="divide-y divide-slate-200">
+                            <!-- Diisi via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TABEL 2: RIWAYAT PENGAMBILAN HARIAN RIIL -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-2 text-sm sm:text-base">
+                        <i data-lucide="clipboard-list" class="w-5 h-5 text-purple-600"></i> Riwayat Pengambilan Harian Riil
+                    </h3>
+                    <div class="w-full sm:w-72 relative">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+                        <input type="text" id="search-pengambilan" oninput="renderTablePengambilan()" placeholder="Cari berdasarkan nama barang..." class="w-full pl-9 pr-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">Tgl Keluar <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Nama Pengambil <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Nama Barang <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Spesifikasi <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Jumlah Keluar <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Keterangan <div class="resizer" onmousedown="initResize(event)"></div></th>
+                                <th class="p-3">Petugas Logistik <div class="resizer" onmousedown="initResize(event)"></div></th>
                                 <th class="p-3 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="tableReturBody" class="divide-y divide-slate-200">
-                            <!-- Data injected via JS -->
+                        <tbody id="table-pengambilan-body" class="divide-y divide-slate-200">
+                            <!-- Diisi via JS -->
                         </tbody>
                     </table>
                 </div>
@@ -244,466 +403,1238 @@
 
     </main>
 
-    <!-- MODAL INPUT FORM -->
-    <div id="formModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200">
-            <div class="px-5 py-4 bg-slate-900 text-white flex justify-between items-center">
-                <h3 id="modalTitle" class="font-bold text-base">Form Input</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            LogistikPRO - Aplikasi Monitoring Logistik Proyek &copy; 2026. Data tersimpan otomatis di browser & dapat dibagikan bersama.
+        </div>
+    </footer>
+
+
+    <!-- ================= MODAL / POPUP RENCANA & FORM ================= -->
+
+    <!-- Modal Detail Dashboard (Klik Panel) -->
+    <div id="modal-dashboard-detail" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 id="modal-dash-title" class="font-bold text-lg text-slate-900">Rincian Dashboard</h3>
+                <button onclick="closeModal('modal-dashboard-detail')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
-            <form id="dynamicForm" onsubmit="handleFormSubmit(event)" class="p-5 space-y-4">
-                <input type="hidden" id="formType">
-                
-                <div id="fieldNoDoc" class="space-y-1">
-                    <label id="labelNoDoc" class="block text-xs font-semibold text-slate-600 uppercase">Nomor Dokumen</label>
-                    <input type="text" id="inputNoDoc" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
+            <div id="modal-dash-content" class="space-y-3">
+                <!-- Diisi via JS -->
+            </div>
+            <div class="flex justify-end pt-2">
+                <button onclick="closeModal('modal-dashboard-detail')" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm">Tutup</button>
+            </div>
+        </div>
+    </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="space-y-1">
-                        <label class="block text-xs font-semibold text-slate-600 uppercase">Tanggal</label>
-                        <input type="date" id="inputTanggal" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+    <!-- Modal Form SPP (Multiple Items) -->
+    <div id="modal-spp" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 max-h-[95vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 id="modal-spp-title" class="font-bold text-lg text-slate-900">Form Input SPP</h3>
+                <button onclick="closeModal('modal-spp')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <form id="form-spp" onsubmit="saveSPP(event)" class="space-y-4">
+                <input type="hidden" id="spp-edit-index" value="">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">No SPP</label>
+                        <input type="text" id="spp-no" required placeholder="Cth: SPP/001/IX/2026" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
                     </div>
-                    <div class="space-y-1">
-                        <label id="labelExtra1" class="block text-xs font-semibold text-slate-600 uppercase">Pemohon / Vendor</label>
-                        <input type="text" id="inputExtra1" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal SPP</label>
+                        <input type="date" id="spp-tanggal" required class="w-full p-2 border border-slate-300 rounded-lg text-sm">
                     </div>
-                </div>
-
-                <div class="space-y-1">
-                    <label class="block text-xs font-semibold text-slate-600 uppercase">Nama Barang / Material (Ketik Manual)</label>
-                    <input type="text" id="inputNamaBarang" required placeholder="Contoh: Semen Portland, Pipa PVC 3 inch, Besi Ulir..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="space-y-1">
-                        <label class="block text-xs font-semibold text-slate-600 uppercase">Jumlah</label>
-                        <input type="number" step="any" id="inputJumlah" required min="0.01" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    </div>
-                    <div class="space-y-1" id="fieldSatuanContainer">
-                        <label class="block text-xs font-semibold text-slate-600 uppercase">Satuan</label>
-                        <input type="text" id="inputSatuan" placeholder="Zak, Pcs, Batang, M3..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Yang Mengajukan</label>
+                        <input type="text" id="spp-pengaju" required placeholder="Nama / Bagian" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
                     </div>
                 </div>
 
-                <div class="space-y-1">
-                    <label id="labelExtra2" class="block text-xs font-semibold text-slate-600 uppercase">Keterangan / Keperluan</label>
-                    <textarea id="inputExtra2" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                <!-- Bagian Item Barang (Multiple) -->
+                <div class="border-t pt-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-bold text-slate-700 uppercase">Daftar Nama Barang</label>
+                        <button type="button" onclick="addSppItemRow()" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Baris Barang
+                        </button>
+                    </div>
+                    <div id="spp-items-container" class="space-y-3">
+                        <!-- Baris Dinamis -->
+                    </div>
                 </div>
 
-                <div class="pt-3 flex justify-end space-x-2">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 rounded-lg text-sm font-medium transition">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition">Simpan Data</button>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Keterangan Umum</label>
+                    <input type="text" id="spp-keterangan" placeholder="Keterangan opsional" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-spp')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm">Batal</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold">Simpan SPP</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MOBILE BOTTOM NAVIGATION BAR -->
-    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 text-white border-t border-slate-800 flex justify-around py-2.5 z-40">
-        <button onclick="switchTab('dashboard')" class="mobile-nav-btn flex flex-col items-center text-blue-400 text-xs" data-target="dashboard">
-            <i class="fa-solid fa-chart-pie text-lg mb-0.5"></i> Dashboard
-        </button>
-        <button onclick="switchTab('spp')" class="mobile-nav-btn flex flex-col items-center text-slate-400 text-xs" data-target="spp">
-            <i class="fa-solid fa-file-invoice text-lg mb-0.5"></i> SPP
-        </button>
-        <button onclick="switchTab('masuk')" class="mobile-nav-btn flex flex-col items-center text-slate-400 text-xs" data-target="masuk">
-            <i class="fa-solid fa-truck-ramp-box text-lg mb-0.5"></i> Masuk
-        </button>
-        <button onclick="switchTab('stok')" class="mobile-nav-btn flex flex-col items-center text-slate-400 text-xs" data-target="stok">
-            <i class="fa-solid fa-warehouse text-lg mb-0.5"></i> Stok
-        </button>
-        <button onclick="switchTab('retur')" class="mobile-nav-btn flex flex-col items-center text-slate-400 text-xs" data-target="retur">
-            <i class="fa-solid fa-rotate-left text-lg mb-0.5"></i> Retur
-        </button>
+    <!-- Modal Realisasi Bertahap -->
+    <div id="modal-realisasi" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-lg text-slate-900">Input Realisasi Pembelian</h3>
+                <button onclick="closeModal('modal-realisasi')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <form id="form-realisasi" onsubmit="saveRealisasiItem(event)" class="space-y-4">
+                <input type="hidden" id="realisasi-spp-id" value="">
+                <input type="hidden" id="realisasi-item-idx" value="">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Realisasi</label>
+                    <input type="date" id="realisasi-tgl" required class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Jumlah Realisasi Qty (<span id="realisasi-satuan-lbl"></span>)</label>
+                    <input type="number" step="any" id="realisasi-qty" required placeholder="0" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                    <p class="text-xs text-slate-400 mt-1">Maksimal kekurangan: <span id="realisasi-max-lbl" class="font-bold">0</span></p>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-realisasi')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm">Batal</button>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-semibold">Simpan Realisasi</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <!-- SCRIPT LOGIC -->
+    <!-- Modal Form Barang Masuk -->
+    <div id="modal-barang-masuk" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 max-h-[95vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 id="modal-masuk-title" class="font-bold text-lg text-slate-900">Form Input Barang Masuk</h3>
+                <button onclick="closeModal('modal-barang-masuk')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <form id="form-barang-masuk" onsubmit="saveBarangMasuk(event)" class="space-y-4">
+                <input type="hidden" id="masuk-edit-index" value="">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Masuk</label>
+                        <input type="date" id="masuk-tgl" required class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Vendor / Supplier</label>
+                        <input type="text" id="masuk-vendor" required placeholder="Cth: PT Sumber Material" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                    </div>
+                </div>
+
+                <div class="border-t pt-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-bold text-slate-700 uppercase">Rincian Item Barang Masuk</label>
+                        <button type="button" onclick="addMasukItemRow()" class="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Baris Barang
+                        </button>
+                    </div>
+                    <div id="masuk-items-container" class="space-y-3">
+                        <!-- Baris Dinamis -->
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-barang-masuk')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm">Batal</button>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-semibold">Simpan Barang Masuk</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Akumulasi Vendor -->
+    <div id="modal-vendor-akumulasi" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-4xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                    <i data-lucide="layers" class="w-5 h-5 text-indigo-600"></i> Akumulasi Tagihan & Barang per Vendor
+                </h3>
+                <button onclick="closeModal('modal-vendor-akumulasi')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="table-container">
+                <table class="w-full text-left text-xs sm:text-sm">
+                    <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                        <tr>
+                            <th class="p-3">No Urut</th>
+                            <th class="p-3">Tanggal</th>
+                            <th class="p-3">Nama Vendor</th>
+                            <th class="p-3">Rincian Barang</th>
+                            <th class="p-3">Total Item</th>
+                            <th class="p-3">Akumulasi Total Harga (Rp)</th>
+                            <th class="p-3">Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-akumulasi-vendor-body" class="divide-y divide-slate-200">
+                        <!-- Diisi via JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button onclick="closeModal('modal-vendor-akumulasi')" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form Barang Keluar (Pengambilan) -->
+    <div id="modal-barang-keluar" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 max-h-[95vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-lg text-slate-900">Form Pengambilan/Pengeluaran Barang Harian</h3>
+                <button onclick="closeModal('modal-barang-keluar')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <form id="form-barang-keluar" onsubmit="saveBarangKeluar(event)" class="space-y-4">
+                <input type="hidden" id="keluar-edit-index" value="">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Keluar</label>
+                        <input type="date" id="keluar-tgl" required class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Pengambil Barang</label>
+                        <input type="text" id="keluar-pengambil" required placeholder="Cth: Bpk. Joko (Mandor)" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Petugas Logistik</label>
+                        <input type="text" id="keluar-petugas" required placeholder="Nama Staff Gudang" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                    </div>
+                </div>
+
+                <div class="border-t pt-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-bold text-slate-700 uppercase">Daftar Item Barang Keluar</label>
+                        <button type="button" onclick="addKeluarItemRow()" class="bg-purple-50 text-purple-600 hover:bg-purple-100 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Item Keluar
+                        </button>
+                    </div>
+                    <div id="keluar-items-container" class="space-y-3">
+                        <!-- Baris Dinamis -->
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-barang-keluar')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm">Batal</button>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg text-sm font-semibold">Simpan Pengeluaran</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Share / Kolaborasi -->
+    <div id="modal-share" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                    <i data-lucide="share-2" class="w-5 h-5 text-blue-600"></i> Bagikan & Kolaborasi Proyek
+                </h3>
+                <button onclick="closeModal('modal-share')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="space-y-3 text-sm text-slate-600">
+                <p>Aplikasi ini menyimpan seluruh data secara lokal di perangkat Anda. Untuk berbagi dan berkolaborasi bersama rekan kerja:</p>
+                <ol class="list-decimal list-inside space-y-1.5 font-medium text-slate-700">
+                    <li>Klik tombol <span class="text-blue-600 font-bold">Export JSON</span> di header atas untuk mendownload file data (.json).</li>
+                    <li>Kirimkan file JSON tersebut ke rekan kerja Anda via WhatsApp, Email, atau Google Drive.</li>
+                    <li>Rekan kerja Anda membuka file HTML LogistikPRO ini di perangkat mereka, lalu klik <span class="text-amber-600 font-bold">Import JSON</span> untuk memuat data terbaru Anda.</li>
+                </ol>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs text-slate-500">
+                    <strong>Tips Kolaborasi:</strong> Anda juga bisa menaruh file HTML ini di folder bersama (Google Drive / OneDrive) agar dapat diakses bersama tim proyek.
+                </div>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button onclick="closeModal('modal-share')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Mengerti</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
     <script>
-        // State Data Utama
-        let db = {
-            spp: JSON.parse(localStorage.getItem('logpro_spp')) || [],
-            masuk: JSON.parse(localStorage.getItem('logpro_masuk')) || [],
-            retur: JSON.parse(localStorage.getItem('logpro_retur')) || []
+        // --- GLOBAL STATE ---
+        let appData = {
+            spp: [],          // Array objek SPP
+            barangMasuk: [],  // Array objek Barang Masuk
+            barangKeluar: []  // Array objek Barang Keluar / Pengambilan
         };
 
-        let summaryChartInstance = null;
+        // Daftar dropdown numetext (Katalog nama barang & satuan umum)
+        const catalogBarang = [
+            "Semen Portland (Zak)", "Besi Beton Polos 10mm", "Besi Beton Ulir 16mm", 
+            "Pasir Pasang", "Batu Split 2-3", "Bata Ringan (Hebel)", 
+            "Paku Kayu 5cm", "Kabel NYM 3x2.5mm", "Pipa PVC 4 inch", "Cat Tembok Putih 25kg"
+        ];
+        const catalogSatuan = ["Zak", "Batang", "Kg", "M3", "M2", "Pcs", "Meter", "Roll", "Galon", "Box"];
 
-        // Toggle Mobile Menu Header Dropdown
-        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-            const nav = document.getElementById('mainNav');
-            nav.classList.toggle('hidden');
-            nav.classList.toggle('flex');
-            nav.classList.toggle('flex-col');
-            nav.classList.toggle('absolute');
-            nav.classList.toggle('top-full');
-            nav.classList.toggle('left-0');
-            nav.classList.toggle('right-0');
-            nav.classList.toggle('bg-slate-900');
-            nav.classList.toggle('p-4');
-            nav.classList.toggle('shadow-lg');
+        // --- INIT & LOCAL STORAGE ---
+        document.addEventListener("DOMContentLoaded", () => {
+            loadLocalStorage();
+            lucide.createIcons();
+            switchTab('dashboard');
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            ['spp-tanggal', 'masuk-tgl', 'keluar-tgl', 'realisasi-tgl'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el && !el.value) el.value = today;
+            });
         });
 
-        // Tab Navigation
-        function switchTab(targetId) {
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(`tab-${targetId}`).classList.remove('hidden');
+        function saveLocalStorage() {
+            localStorage.setItem('logistikpro_data', JSON.stringify(appData));
+            lucide.createIcons();
+        }
 
-            // Update Desktop Nav Active State
+        function loadLocalStorage() {
+            const data = localStorage.getItem('logistikpro_data');
+            if (data) {
+                try {
+                    appData = JSON.parse(data);
+                    if(!appData.spp) appData.spp = [];
+                    if(!appData.barangMasuk) appData.barangMasuk = [];
+                    if(!appData.barangKeluar) appData.barangKeluar = [];
+                } catch(e) {
+                    console.error("Gagal parse localstorage", e);
+                }
+            } else {
+                // Dummy Data Awal untuk Demo
+                appData.spp = [
+                    {
+                        id: 'SPP-001', tanggal: '2026-09-01', pengaju: 'Andi (Civil)', keterangan: 'Keperluan struktur lantai 2',
+                        items: [
+                            { nama: 'Semen Portland (Zak)', spesifikasi: 'Tiga Roda 50kg', qty: 100, sat: 'Zak', realisasi: [{tgl: '2026-09-02', qty: 80}] }
+                        ]
+                    }
+                ];
+                appData.barangMasuk = [
+                    {
+                        id: 'BM-001', tanggal: '2026-09-02', vendor: 'PT Sumber Material', keterangan: 'Pengiriman tahap 1',
+                        items: [
+                            { nama: 'Semen Portland (Zak)', spesifikasi: 'Tiga Roda 50kg', qty: 80, sat: 'Zak', harsat: 65000 }
+                        ]
+                    }
+                ];
+                appData.barangKeluar = [
+                    {
+                        id: 'BK-001', tanggal: '2026-09-03', pengambil: 'Bpk. Joko', petugas: 'Rian Logistik', keterangan: 'Pengecoran kolom',
+                        items: [
+                            { nama: 'Semen Portland (Zak)', spesifikasi: 'Tiga Roda 50kg', qty: 20, sat: 'Zak' }
+                        ]
+                    }
+                ];
+                saveLocalStorage();
+            }
+            refreshAllViews();
+        }
+
+        function refreshAllViews() {
+            renderDashboard();
+            renderTableSPP();
+            renderTableBarangMasuk();
+            renderTableStokGudang();
+            renderTablePengambilan();
+        }
+
+        function refreshData() {
+            loadLocalStorage();
+            alert("Data berhasil disinkronkan!");
+        }
+
+        // --- NAVIGATION TABS ---
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const navMenu = document.getElementById('nav-menu');
+        if(mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                navMenu.classList.toggle('hidden');
+                navMenu.classList.toggle('flex');
+                navMenu.classList.toggle('flex-col');
+                navMenu.classList.toggle('absolute');
+                navMenu.classList.toggle('top-full');
+                navMenu.classList.toggle('left-0');
+                navMenu.classList.toggle('w-full');
+                navMenu.classList.toggle('bg-slate-900');
+                navMenu.classList.toggle('p-4');
+                navMenu.classList.toggle('shadow-xl');
+            });
+        }
+
+        function switchTab(tabId) {
+            ['dashboard', 'spp', 'barang-masuk', 'stok-barang'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            // Active button style
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                if(btn.dataset.target === targetId) {
-                    btn.classList.add('bg-blue-600', 'text-white');
-                    btn.classList.remove('hover:bg-slate-800', 'text-slate-300');
-                } else {
-                    btn.classList.remove('bg-blue-600', 'text-white');
-                    btn.classList.add('hover:bg-slate-800', 'text-slate-300');
-                }
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('hover:bg-slate-800', 'text-slate-300');
             });
-
-            // Update Mobile Nav Active State
-            document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
-                if(btn.dataset.target === targetId) {
-                    btn.classList.add('text-blue-400');
-                    btn.classList.remove('text-slate-400');
-                } else {
-                    btn.classList.remove('text-blue-400');
-                    btn.classList.add('text-slate-400');
-                }
-            });
-
-            // Tutup menu mobile jika terbuka
-            const nav = document.getElementById('mainNav');
-            if(window.innerWidth < 768 && nav.classList.contains('flex')) {
-                nav.classList.add('hidden');
-                nav.classList.remove('flex', 'flex-col', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-slate-900', 'p-4', 'shadow-lg');
-            }
-
-            if(targetId === 'dashboard') renderDashboard();
-            if(targetId === 'spp') renderSPP();
-            if(targetId === 'masuk') renderMasuk();
-            if(targetId === 'stok') renderStok();
-            if(targetId === 'retur') renderRetur();
-        }
-
-        function saveDataLocal() {
-            localStorage.setItem('logpro_spp', JSON.stringify(db.spp));
-            localStorage.setItem('logpro_masuk', JSON.stringify(db.masuk));
-            localStorage.setItem('logpro_retur', JSON.stringify(db.retur));
-        }
-
-        // Modal Control
-        function openModal(type) {
-            const modal = document.getElementById('formModal');
-            document.getElementById('formType').value = type;
-            document.getElementById('dynamicForm').reset();
-            document.getElementById('inputTanggal').valueAsDate = new Date();
-
-            const title = document.getElementById('modalTitle');
-            const fieldNoDoc = document.getElementById('fieldNoDoc');
-            const labelNoDoc = document.getElementById('labelNoDoc');
-            const labelExtra1 = document.getElementById('labelExtra1');
-            const labelExtra2 = document.getElementById('labelExtra2');
-
-            if(type === 'spp') {
-                title.innerText = 'Buat Surat Permintaan Pembelian (SPP)';
-                fieldNoDoc.style.display = 'block';
-                labelNoDoc.innerText = 'Nomor SPP';
-                labelExtra1.innerText = 'Nama Pemohon';
-                labelExtra2.innerText = 'Keperluan Proyek';
-            } else if(type === 'masuk') {
-                title.innerText = 'Input Barang Masuk Gudang';
-                fieldNoDoc.style.display = 'block';
-                labelNoDoc.innerText = 'Nomor Surat Jalan / Resi';
-                labelExtra1.innerText = 'Supplier / Vendor';
-                labelExtra2.innerText = 'Keterangan Penerimaan';
-            } else if(type === 'retur') {
-                title.innerText = 'Input Retur / Pengeluaran Barang';
-                fieldNoDoc.style.display = 'none';
-                labelExtra1.innerText = 'Penerima / Lokasi Kerja';
-                labelExtra2.innerText = 'Alasan / Keterangan Keluar';
-            }
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('formModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        // Form Submit Handler
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            const type = document.getElementById('formType').value;
+            event && event.currentTarget && event.currentTarget.classList.add('bg-blue-600', 'text-white');
             
-            const item = {
-                id: Date.now(),
-                tanggal: document.getElementById('inputTanggal').value,
-                namaBarang: document.getElementById('inputNamaBarang').value.trim(),
-                jumlah: parseFloat(document.getElementById('inputJumlah').value) || 0,
-                satuan: document.getElementById('inputSatuan').value.trim(),
-                extra1: document.getElementById('inputExtra1').value.trim(),
-                extra2: document.getElementById('inputExtra2').value.trim(),
-                noDoc: document.getElementById('inputNoDoc').value.trim()
+            // Close mobile menu if open
+            if(window.innerWidth < 768) {
+                navMenu.classList.add('hidden');
+                navMenu.classList.remove('flex', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-slate-900', 'p-4');
+            }
+            lucide.createIcons();
+        }
+
+        // --- MODAL CONTROLLER ---
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); lucide.createIcons(); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+
+        // ================= 1. DASHBOARD & CHARTS =================
+        let chartSppInstance = null;
+        let chartDonutInstance = null;
+
+        function renderDashboard() {
+            let totalSppItems = 0;
+            let totalKurangQty = 0;
+            let totalMasukQty = 0;
+            let totalStokQty = 0;
+
+            let ringkasanKurangHTML = '';
+            let listSppDetail = [];
+            let listKurangDetail = [];
+            let listMasukDetail = [];
+            let listStokDetail = [];
+
+            // Hitung SPP & Kekurangan
+            appData.spp.forEach(spp => {
+                spp.items.forEach((item, idx) => {
+                    totalSppItems++;
+                    listSppDetail.push(`[${spp.id}] ${item.nama} (${item.qty} ${item.sat}) - Pengaju: ${spp.pengaju}`);
+                    
+                    let totalRealisasi = item.realisasi ? item.realisasi.reduce((acc, r) => acc + Number(r.qty), 0) : 0;
+                    let kurang = item.qty - totalRealisasi;
+                    if(kurang > 0) {
+                        totalKurangQty += kurang;
+                        listKurangDetail.push(`[${spp.id}] ${item.nama}: Kurang ${kurang} ${item.sat} (SPP: ${item.qty}, Realisasi: ${totalRealisasi})`);
+                        ringkasanKurangHTML += `
+                            <tr>
+                                <td class="p-3 font-medium">${spp.id}</td>
+                                <td class="p-3">${spp.tanggal}</td>
+                                <td class="p-3">${item.nama} (${item.spesifikasi || '-'})</td>
+                                <td class="p-3 font-semibold text-blue-600">${item.qty}</td>
+                                <td class="p-3 text-emerald-600">${totalRealisasi}</td>
+                                <td class="p-3 font-bold text-amber-600">${kurang}</td>
+                                <td class="p-3">${item.sat}</td>
+                            </tr>
+                        `;
+                    }
+                });
+            });
+
+            if(!ringkasanKurangHTML) {
+                ringkasanKurangHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Semua SPP telah terpenuhi 100%!</td></tr>`;
+            }
+
+            // Hitung Barang Masuk
+            appData.barangMasuk.forEach(bm => {
+                bm.items.forEach(item => {
+                    totalMasukQty += Number(item.qty);
+                    listMasukDetail.push(`[${bm.tanggal}] ${bm.vendor} - ${item.nama} : ${item.qty} ${item.sat}`);
+                });
+            });
+
+            // Hitung Stok (Masuk - Keluar)
+            let stokMap = calculateStockMap();
+            Object.values(stokMap).forEach(stk => {
+                totalStokQty += stk.saldo;
+                if(stk.saldo > 0) {
+                    listStokDetail.push(`${stk.nama} (${stk.spesifikasi}): Saldo ${stk.saldo} ${stk.sat}`);
+                }
+            });
+
+            // Update Panel Text
+            document.getElementById('dash-spp-count').innerText = `${totalSppItems} Item`;
+            document.getElementById('dash-kurang-count').innerText = `${totalKurangQty} Qty`;
+            document.getElementById('dash-masuk-count').innerText = `${totalMasukQty} Qty`;
+            document.getElementById('dash-stok-count').innerText = `${totalStokQty} Qty`;
+            document.getElementById('badge-ringkasan-kurang').innerText = `${totalKurangQty > 0 ? totalKurangQty : 0} Kekurangan`;
+            document.getElementById('table-ringkasan-body').innerHTML = ringkasanKurangHTML;
+
+            // Simpan data untuk modal klik panel
+            window.dashModalData = {
+                spp: { title: 'Daftar SPP Terdaftar', items: listSppDetail },
+                kekurangan: { title: 'Rincian Kekurangan Realisasi SPP', items: listKurangDetail },
+                masuk: { title: 'Rincian Barang Masuk dari Vendor', items: listMasukDetail },
+                stok: { title: 'Rincian Stok Barang Aktif di Gudang', items: listStokDetail }
             };
 
-            if(type === 'spp') db.spp.push(item);
-            else if(type === 'masuk') db.masuk.push(item);
-            else if(type === 'retur') db.retur.push(item);
-
-            saveDataLocal();
-            closeModal();
-            
-            // Refresh current active tab
-            if(type === 'spp') renderSPP();
-            if(type === 'masuk') renderMasuk();
-            if(type === 'retur') renderRetur();
-            renderDashboard();
-            alert('Data berhasil disimpan!');
+            renderCharts(totalSppItems, totalKurangQty, totalMasukQty, stokMap);
         }
 
-        // Delete Item
-        function deleteItem(type, id) {
-            if(confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                db[type] = db[type].filter(x => x.id !== id);
-                saveDataLocal();
-                if(type === 'spp') renderSPP();
-                if(type === 'masuk') renderMasuk();
-                if(type === 'retur') renderRetur();
-                renderDashboard();
-            }
+        function openDashboardDetail(type) {
+            const data = window.dashModalData[type];
+            if(!data) return;
+            document.getElementById('modal-dash-title').innerText = data.title;
+            let html = data.items.length > 0 
+                ? `<ul class="list-disc list-inside space-y-1.5 text-sm">${data.items.map(i => `<li>${i}</li>`).join('')}</ul>`
+                : `<p class="text-sm text-slate-400">Tidak ada data untuk kategori ini.</p>`;
+            document.getElementById('modal-dash-content').innerHTML = html;
+            openModal('modal-dashboard-detail');
         }
 
-        // Render Dashboard & Chart
-        function renderDashboard() {
-            document.getElementById('statTotalSPP').innerText = db.spp.length;
-            document.getElementById('statTotalMasuk').innerText = db.masuk.length;
-            document.getElementById('statTotalRetur').innerText = db.retur.length;
+        function renderCharts(totalSpp, totalKurang, totalMasuk, stokMap) {
+            // Bar Chart SPP vs Realisasi
+            let totalRealisasiAll = 0;
+            appData.spp.forEach(s => s.items.forEach(i => {
+                totalRealisasiAll += i.realisasi ? i.realisasi.reduce((a,b)=>a+Number(b.qty),0) : 0;
+            }));
 
-            // Hitung total item unik
-            const allItems = new Set([
-                ...db.spp.map(x => x.namaBarang.toLowerCase()),
-                ...db.masuk.map(x => x.namaBarang.toLowerCase()),
-                ...db.retur.map(x => x.namaBarang.toLowerCase())
-            ]);
-            document.getElementById('statTotalItem').innerText = allItems.size;
-
-            // Render Chart
-            const ctx = document.getElementById('summaryChart').getContext('2d');
-            if(summaryChartInstance) summaryChartInstance.destroy();
-
-            summaryChartInstance = new Chart(ctx, {
+            const ctxBar = document.getElementById('chartSppRealisasi').getContext('2d');
+            if(chartSppInstance) chartSppInstance.destroy();
+            chartSppInstance = new Chart(ctxBar, {
                 type: 'bar',
                 data: {
-                    labels: ['Permintaan (SPP)', 'Barang Masuk', 'Retur / Keluar'],
+                    labels: ['Total Permintaan (SPP)', 'Total Realisasi Terpenuhi', 'Kekurangan Realisasi'],
                     datasets: [{
-                        label: 'Jumlah Transaksi',
-                        data: [db.spp.length, db.masuk.length, db.retur.length],
-                        backgroundColor: ['#3b82f6', '#10b981', '#f43f5e'],
+                        label: 'Volume Material',
+                        data: [
+                            appData.spp.reduce((acc, s) => acc + s.items.reduce((a,i)=>a+Number(i.qty),0), 0),
+                            totalRealisasiAll,
+                            totalKurang
+                        ],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
                         borderRadius: 8
                     }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // Donut Chart Stok Gudang
+            const labelsStok = [];
+            const dataStok = [];
+            Object.values(stokMap).forEach(s => {
+                if(s.saldo > 0) {
+                    labelsStok.push(s.nama);
+                    dataStok.push(s.saldo);
                 }
             });
-        }
 
-        // Render SPP Table
-        function renderSPP() {
-            const tbody = document.getElementById('tableSPPBody');
-            tbody.innerHTML = '';
-            if(db.spp.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-400">Belum ada data Permintaan Pembelian (SPP).</td></tr>`;
-                return;
-            }
-            db.spp.slice().reverse().forEach(item => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 font-medium text-slate-800">${item.noDoc || '-'}</td>
-                        <td class="p-3 text-slate-600">${item.tanggal}</td>
-                        <td class="p-3 text-slate-600">${item.extra1}</td>
-                        <td class="p-3 font-semibold text-slate-800">${item.namaBarang}</td>
-                        <td class="p-3 text-slate-600">${item.jumlah} ${item.satuan}</td>
-                        <td class="p-3 text-slate-600">${item.extra2 || '-'}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="deleteItem('spp', ${item.id})" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
-                        </td>
-                    </tr>
-                `;
+            const ctxDonut = document.getElementById('chartDonutStok').getContext('2d');
+            if(chartDonutInstance) chartDonutInstance.destroy();
+            chartDonutInstance = new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: {
+                    labels: labelsStok.length > 0 ? labelsStok : ['Belum Ada Stok'],
+                    datasets: [{
+                        data: dataStok.length > 0 ? dataStok : [1],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
             });
         }
 
-        // Render Masuk Table
-        function renderMasuk() {
-            const tbody = document.getElementById('tableMasukBody');
-            tbody.innerHTML = '';
-            if(db.masuk.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">Belum ada data barang masuk.</td></tr>`;
-                return;
-            }
-            db.masuk.slice().reverse().forEach(item => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 text-slate-600">${item.tanggal}</td>
-                        <td class="p-3 font-medium text-slate-800">${item.noDoc || '-'}</td>
-                        <td class="p-3 font-semibold text-slate-800">${item.namaBarang}</td>
-                        <td class="p-3 text-emerald-600 font-semibold">+${item.jumlah} ${item.satuan}</td>
-                        <td class="p-3 text-slate-600">${item.extra1}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="deleteItem('masuk', ${item.id})" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
+
+        // ================= 2. FITUR SPP & REALISASI =================
+        function openModalSPP() {
+            document.getElementById('form-spp').reset();
+            document.getElementById('spp-edit-index').value = '';
+            document.getElementById('modal-spp-title').innerText = 'Form Input SPP Baru';
+            document.getElementById('spp-items-container').innerHTML = '';
+            addSppItemRow(); // Tambah minimal 1 baris
+            openModal('modal-spp');
         }
 
-        // Render Retur Table
-        function renderRetur() {
-            const tbody = document.getElementById('tableReturBody');
-            tbody.innerHTML = '';
-            if(db.retur.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">Belum ada data retur / keluar.</td></tr>`;
-                return;
+        function addSppItemRow(nama='', spesifikasi='', qty='', sat='') {
+            const container = document.getElementById('spp-items-container');
+            const rowId = 'spp_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
+            
+            let namaOptions = catalogBarang.map(b => `<option value="${b}" ${b===nama?'selected':''}>${b}</option>`).join('');
+            let satOptions = catalogSatuan.map(s => `<option value="${s}" ${s===sat?'selected':''}>${s}</option>`).join('');
+
+            const html = `
+                <div id="${rowId}" class="flex flex-col sm:flex-row gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div class="w-full sm:w-1/3">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Nama Barang</label>
+                        <input type="text" list="list-barang-spp" name="nama" value="${nama}" required placeholder="Pilih/ketik barang" class="w-full p-1.5 border border-slate-300 rounded text-xs nama-input">
+                    </div>
+                    <div class="w-full sm:w-1/4">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Spesifikasi</label>
+                        <input type="text" name="spesifikasi" value="${spesifikasi}" placeholder="Spesifikasi" class="w-full p-1.5 border border-slate-300 rounded text-xs spec-input">
+                    </div>
+                    <div class="w-24">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Qty</label>
+                        <input type="number" step="any" name="qty" value="${qty}" required placeholder="Qty" class="w-full p-1.5 border border-slate-300 rounded text-xs qty-input">
+                    </div>
+                    <div class="w-28">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Satuan</label>
+                        <select name="sat" class="w-full p-1.5 border border-slate-300 rounded text-xs sat-input">
+                            ${satOptions}
+                        </select>
+                    </div>
+                    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-rose-500 hover:text-rose-700 p-1.5"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            
+            // Inject datalist for numetext dropdown
+            if(!document.getElementById('list-barang-spp')) {
+                const dl = document.createElement('datalist');
+                dl.id = 'list-barang-spp';
+                dl.innerHTML = catalogBarang.map(b => `<option value="${b}">`).join('');
+                document.body.appendChild(dl);
             }
-            db.retur.slice().reverse().forEach(item => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 text-slate-600">${item.tanggal}</td>
-                        <td class="p-3 font-semibold text-slate-800">${item.namaBarang}</td>
-                        <td class="p-3 text-rose-600 font-semibold">-${item.jumlah} ${item.satuan}</td>
-                        <td class="p-3 text-slate-600">${item.extra2 || item.extra1 || '-'}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="deleteItem('retur', ${item.id})" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
+            lucide.createIcons();
         }
 
-        // Kalkulasi Stok Terpadu & Kartu Gudang
-        function calculateStockSummary() {
-            const stockMap = {};
+        function saveSPP(e) {
+            e.preventDefault();
+            const editIdx = document.getElementById('spp-edit-index').value;
+            const noSpp = document.getElementById('spp-no').value;
+            const tglSpp = document.getElementById('spp-tanggal').value;
+            const pengaju = document.getElementById('spp-pengaju').value;
+            const ket = document.getElementById('spp-keterangan').value;
 
-            // Proses Barang Masuk
-            db.masuk.forEach(m => {
-                const key = m.namaBarang.toLowerCase().trim();
-                if(!stockMap[key]) {
-                    stockMap[key] = { nama: m.namaBarang, satuan: m.satuan || '', masuk: 0, keluar: 0 };
+            const itemRows = document.querySelectorAll('#spp-items-container > div');
+            if(itemRows.length === 0) {
+                alert("Harap masukkan minimal 1 item barang!");
+                return;
+            }
+
+            let items = [];
+            itemRows.forEach(row => {
+                items.push({
+                    nama: row.querySelector('[name="nama"]').value,
+                    spesifikasi: row.querySelector('[name="spesifikasi"]').value,
+                    qty: Number(row.querySelector('[name="qty"]').value),
+                    sat: row.querySelector('[name="sat"]').value,
+                    realisasi: [] // existing realisasi will be handled if edit
+                });
+            });
+
+            if(editIdx !== '') {
+                // Preserve old realisasi if editing same items
+                items.forEach((newItem, i) => {
+                    if(appData.spp[editIdx].items[i] && appData.spp[editIdx].items[i].realisasi) {
+                        newItem.realisasi = appData.spp[editIdx].items[i].realisasi;
+                    }
+                });
+                appData.spp[editIdx] = { id: noSpp, tanggal: tglSpp, pengaju, keterangan: ket, items };
+            } else {
+                appData.spp.unshift({ id: noSpp, tanggal: tglSpp, pengaju, keterangan: ket, items });
+            }
+
+            saveLocalStorage();
+            closeModal('modal-spp');
+            refreshAllViews();
+        }
+
+        function renderTableSPP() {
+            const keyword = document.getElementById('search-spp').value.toLowerCase();
+            const tbody = document.getElementById('table-spp-body');
+            tbody.innerHTML = '';
+
+            let filtered = appData.spp.filter(s => s.id.toLowerCase().includes(keyword) || s.pengaju.toLowerCase().includes(keyword));
+            document.getElementById('count-total-spp').innerText = appData.spp.length;
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" class="p-4 text-center text-slate-400">Tidak ada data SPP ditemukan.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((spp, sppIdx) => {
+                spp.items.forEach((item, itemIdx) => {
+                    let totalRealisasi = item.realisasi ? item.realisasi.reduce((acc, r) => acc + Number(r.qty), 0) : 0;
+                    let isTerpenuhi = totalRealisasi >= item.qty;
+                    let statusBadge = isTerpenuhi 
+                        ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">Terpenuhi</span>`
+                        : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold">Kurang</span>`;
+
+                    let realisasiListHTML = item.realisasi && item.realisasi.length > 0 
+                        ? item.realisasi.map((r, rIdx) => `<div class="text-[11px] flex justify-between items-center bg-slate-50 px-1.5 py-0.5 rounded my-0.5 border"><span>${r.tgl}: <strong>${r.qty} ${item.sat}</strong></span> <button onclick="deleteRealisasi(${sppIdx}, ${itemIdx}, ${rIdx})" class="text-rose-500 hover:text-rose-700 ml-1"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join('')
+                        : `<span class="text-slate-400 italic text-[11px]">Belum ada</span>`;
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition";
+                    tr.innerHTML = `
+                        <td class="p-3 font-bold text-slate-900">${spp.id}</td>
+                        <td class="p-3">${spp.tanggal}</td>
+                        <td class="p-3">${spp.pengaju}</td>
+                        <td class="p-3 font-semibold text-blue-600">${item.nama}</td>
+                        <td class="p-3 text-slate-600">${item.spesifikasi || '-'}</td>
+                        <td class="p-3 font-bold">${item.qty}</td>
+                        <td class="p-3">${item.sat}</td>
+                        <td class="p-3">${realisasiListHTML}</td>
+                        <td class="p-3 font-bold text-emerald-600">${totalRealisasi}</td>
+                        <td class="p-3">${statusBadge}</td>
+                        <td class="p-3 text-slate-500">${spp.keterangan || '-'}</td>
+                        <td class="p-3 text-center whitespace-nowrap">
+                            <button onclick="openModalRealisasi(${sppIdx}, ${itemIdx})" title="Tambah Realisasi" class="p-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded mr-1"><i data-lucide="check-circle" class="w-4 h-4"></i></button>
+                            <button onclick="editSPP(${sppIdx})" title="Edit SPP" class="p-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded mr-1"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                            <button onclick="deleteSPPItem(${sppIdx}, ${itemIdx})" title="Hapus Item SPP" class="p-1 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+            lucide.createIcons();
+        }
+
+        function editSPP(sppIdx) {
+            const spp = appData.spp[sppIdx];
+            document.getElementById('spp-edit-index').value = sppIdx;
+            document.getElementById('modal-spp-title').innerText = 'Edit Data SPP';
+            document.getElementById('spp-no').value = spp.id;
+            document.getElementById('spp-tanggal').value = spp.tanggal;
+            document.getElementById('spp-pengaju').value = spp.pengaju;
+            document.getElementById('spp-keterangan').value = spp.keterangan;
+
+            const container = document.getElementById('spp-items-container');
+            container.innerHTML = '';
+            spp.items.forEach(item => {
+                addSppItemRow(item.nama, item.spesifikasi, item.qty, item.sat);
+            });
+            openModal('modal-spp');
+        }
+
+        function deleteSPPItem(sppIdx, itemIdx) {
+            if(confirm("Hapus item SPP ini?")) {
+                appData.spp[sppIdx].items.splice(itemIdx, 1);
+                if(appData.spp[sppIdx].items.length === 0) {
+                    appData.spp.splice(sppIdx, 1);
                 }
-                stockMap[key].masuk += m.jumlah;
-                if(m.satuan) stockMap[key].satuan = m.satuan;
-            });
-
-            // Proses Retur / Keluar
-            db.retur.forEach(r => {
-                const key = r.namaBarang.toLowerCase().trim();
-                if(!stockMap[key]) {
-                    stockMap[key] = { nama: r.namaBarang, satuan: r.satuan || '', masuk: 0, keluar: 0 };
-                }
-                stockMap[key].keluar += r.jumlah;
-                if(r.satuan) stockMap[key].satuan = r.satuan;
-            });
-
-            return Object.values(stockMap);
+                saveLocalStorage();
+                refreshAllViews();
+            }
         }
 
-        function renderStok() {
-            const tbody = document.getElementById('tableStokBody');
-            tbody.innerHTML = '';
-            const summary = calculateStockSummary();
+        function openModalRealisasi(sppIdx, itemIdx) {
+            const item = appData.spp[sppIdx].items[itemIdx];
+            let totalRealisasi = item.realisasi ? item.realisasi.reduce((acc, r) => acc + Number(r.qty), 0) : 0;
+            let kurang = item.qty - totalRealisasi;
 
-            if(summary.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">Belum ada data rekap stok gudang.</td></tr>`;
+            document.getElementById('realisasi-spp-id').value = sppIdx;
+            document.getElementById('realisasi-item-idx').value = itemIdx;
+            document.getElementById('realisasi-satuan-lbl').innerText = item.sat;
+            document.getElementById('realisasi-max-lbl').innerText = kurang > 0 ? kurang : 0;
+            document.getElementById('realisasi-qty').value = kurang > 0 ? kurang : 0;
+            openModal('modal-realisasi');
+        }
+
+        function saveRealisasiItem(e) {
+            e.preventDefault();
+            const sppIdx = document.getElementById('realisasi-spp-id').value;
+            const itemIdx = document.getElementById('realisasi-item-idx').value;
+            const tgl = document.getElementById('realisasi-tgl').value;
+            const qty = Number(document.getElementById('realisasi-qty').value);
+
+            const item = appData.spp[sppIdx].items[itemIdx];
+            if(!item.realisasi) item.realisasi = [];
+
+            item.realisasi.push({ tgl, qty });
+            saveLocalStorage();
+            closeModal('modal-realisasi');
+            refreshAllViews();
+        }
+
+        function deleteRealisasi(sppIdx, itemIdx, rIdx) {
+            if(confirm("Hapus catatan realisasi ini?")) {
+                appData.spp[sppIdx].items[itemIdx].realisasi.splice(rIdx, 1);
+                saveLocalStorage();
+                refreshAllViews();
+            }
+        }
+
+
+        // ================= 3. FITUR BARANG MASUK =================
+        function openModalBarangMasuk() {
+            document.getElementById('form-barang-masuk').reset();
+            document.getElementById('masuk-edit-index').value = '';
+            document.getElementById('modal-masuk-title').innerText = 'Form Input Barang Masuk';
+            document.getElementById('masuk-items-container').innerHTML = '';
+            addMasukItemRow();
+            openModal('modal-barang-masuk');
+        }
+
+        function addMasukItemRow(nama='', spesifikasi='', qty='', sat='', harsat='') {
+            const container = document.getElementById('masuk-items-container');
+            const rowId = 'masuk_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
+
+            let satOptions = catalogSatuan.map(s => `<option value="${s}" ${s===sat?'selected':''}>${s}</option>`).join('');
+
+            const html = `
+                <div id="${rowId}" class="flex flex-col sm:flex-row gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div class="w-full sm:w-1/3">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Nama Barang</label>
+                        <input type="text" list="list-barang-masuk" name="nama" value="${nama}" required placeholder="Pilih/ketik barang" class="w-full p-1.5 border border-slate-300 rounded text-xs">
+                    </div>
+                    <div class="w-full sm:w-1/4">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Spesifikasi</label>
+                        <input type="text" name="spesifikasi" value="${spesifikasi}" placeholder="Spesifikasi" class="w-full p-1.5 border border-slate-300 rounded text-xs">
+                    </div>
+                    <div class="w-20">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Qty</label>
+                        <input type="number" step="any" name="qty" value="${qty}" required placeholder="Qty" class="w-full p-1.5 border border-slate-300 rounded text-xs">
+                    </div>
+                    <div class="w-24">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Satuan</label>
+                        <select name="sat" class="w-full p-1.5 border border-slate-300 rounded text-xs">
+                            ${satOptions}
+                        </select>
+                    </div>
+                    <div class="w-28">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Harsat (Rp)</label>
+                        <input type="number" step="any" name="harsat" value="${harsat}" placeholder="Harga Satuan" class="w-full p-1.5 border border-slate-300 rounded text-xs">
+                    </div>
+                    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-rose-500 hover:text-rose-700 p-1.5"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+
+            if(!document.getElementById('list-barang-masuk')) {
+                const dl = document.createElement('datalist');
+                dl.id = 'list-barang-masuk';
+                dl.innerHTML = catalogBarang.map(b => `<option value="${b}">`).join('');
+                document.body.appendChild(dl);
+            }
+            lucide.createIcons();
+        }
+
+        function saveBarangMasuk(e) {
+            e.preventDefault();
+            const editIdx = document.getElementById('masuk-edit-index').value;
+            const tgl = document.getElementById('masuk-tgl').value;
+            const vendor = document.getElementById('masuk-vendor').value;
+
+            const itemRows = document.querySelectorAll('#masuk-items-container > div');
+            if(itemRows.length === 0) {
+                alert("Harap masukkan minimal 1 item barang masuk!");
                 return;
             }
 
-            summary.forEach((item, index) => {
-                const sisa = item.masuk - item.keluar;
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 text-slate-500">${index + 1}</td>
-                        <td class="p-3 font-semibold text-slate-800">${item.nama}</td>
-                        <td class="p-3 text-emerald-600 font-medium">+${item.masuk} ${item.satuan}</td>
-                        <td class="p-3 text-rose-600 font-medium">-${item.keluar} ${item.satuan}</td>
-                        <td class="p-3 font-bold text-indigo-600 text-base">${sisa} ${item.satuan}</td>
-                    </tr>
-                `;
+            let items = [];
+            itemRows.forEach(row => {
+                items.push({
+                    nama: row.querySelector('[name="nama"]').value,
+                    spesifikasi: row.querySelector('[name="spesifikasi"]').value,
+                    qty: Number(row.querySelector('[name="qty"]').value),
+                    sat: row.querySelector('[name="sat"]').value,
+                    harsat: Number(row.querySelector('[name="harsat"]').value) || 0
+                });
             });
+
+            if(editIdx !== '') {
+                appData.barangMasuk[editIdx] = { id: 'BM-' + Date.now(), tanggal: tgl, vendor, items };
+            } else {
+                appData.barangMasuk.unshift({ id: 'BM-' + Date.now(), tanggal: tgl, vendor, items });
+            }
+
+            saveLocalStorage();
+            closeModal('modal-barang-masuk');
+            refreshAllViews();
         }
 
-        // Export Data JSON (Backup)
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+        function renderTableBarangMasuk() {
+            const keyword = document.getElementById('search-vendor').value.toLowerCase();
+            const tbody = document.getElementById('table-barang-masuk-body');
+            tbody.innerHTML = '';
+
+            let filtered = appData.barangMasuk.filter(bm => bm.vendor.toLowerCase().includes(keyword));
+            document.getElementById('count-total-masuk').innerText = appData.barangMasuk.reduce((acc, bm) => acc + bm.items.reduce((a,i)=>a+Number(i.qty),0), 0);
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">Tidak ada data barang masuk ditemukan.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((bm, bmIdx) => {
+                bm.items.forEach((item, itemIdx) => {
+                    let totalHarga = item.qty * item.harsat;
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition";
+                    tr.innerHTML = `
+                        <td class="p-3">${bm.tanggal}</td>
+                        <td class="p-3 font-bold text-slate-900">${bm.vendor}</td>
+                        <td class="p-3 font-semibold text-emerald-600">${item.nama}</td>
+                        <td class="p-3 text-slate-600">${item.spesifikasi || '-'}</td>
+                        <td class="p-3 font-bold">${item.qty}</td>
+                        <td class="p-3">${item.sat}</td>
+                        <td class="p-3">Rp ${item.harsat.toLocaleString('id-ID')}</td>
+                        <td class="p-3 font-bold text-slate-900">Rp ${totalHarga.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-slate-500">${bm.keterangan || '-'}</td>
+                        <td class="p-3 text-center whitespace-nowrap">
+                            <button onclick="editBarangMasuk(${bmIdx})" title="Edit" class="p-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded mr-1"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                            <button onclick="deleteBarangMasukItem(${bmIdx}, ${itemIdx})" title="Hapus" class="p-1 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+            lucide.createIcons();
+        }
+
+        function editBarangMasuk(bmIdx) {
+            const bm = appData.barangMasuk[bmIdx];
+            document.getElementById('masuk-edit-index').value = bmIdx;
+            document.getElementById('modal-masuk-title').innerText = 'Edit Barang Masuk';
+            document.getElementById('masuk-tgl').value = bm.tanggal;
+            document.getElementById('masuk-vendor').value = bm.vendor;
+
+            const container = document.getElementById('masuk-items-container');
+            container.innerHTML = '';
+            bm.items.forEach(item => {
+                addMasukItemRow(item.nama, item.spesifikasi, item.qty, item.sat, item.harsat);
+            });
+            openModal('modal-barang-masuk');
+        }
+
+        function deleteBarangMasukItem(bmIdx, itemIdx) {
+            if(confirm("Hapus item barang masuk ini?")) {
+                appData.barangMasuk[bmIdx].items.splice(itemIdx, 1);
+                if(appData.barangMasuk[bmIdx].items.length === 0) {
+                    appData.barangMasuk.splice(bmIdx, 1);
+                }
+                saveLocalStorage();
+                refreshAllViews();
+            }
+        }
+
+        function openModalVendorAkumulasi() {
+            const tbody = document.getElementById('table-akumulasi-vendor-body');
+            tbody.innerHTML = '';
+
+            // Group by vendor
+            let vendorMap = {};
+            appData.barangMasuk.forEach(bm => {
+                if(!vendorMap[bm.vendor]) {
+                    vendorMap[bm.vendor] = { tanggal: bm.tanggal, totalItem: 0, totalHarga: 0, rincian: [], keterangan: bm.keterangan || '-' };
+                }
+                bm.items.forEach(i => {
+                    vendorMap[bm.vendor].totalItem += Number(i.qty);
+                    vendorMap[bm.vendor].totalHarga += (Number(i.qty) * Number(i.harsat));
+                    vendorMap[bm.vendor].rincian.push(`${i.nama} (${i.qty} ${i.sat})`);
+                });
+            });
+
+            let no = 1;
+            Object.keys(vendorMap).forEach(vendor => {
+                let v = vendorMap[vendor];
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold">${no++}</td>
+                    <td class="p-3">${v.tanggal}</td>
+                    <td class="p-3 font-bold text-slate-900">${vendor}</td>
+                    <td class="p-3 text-slate-600">${v.rincian.join(', ')}</td>
+                    <td class="p-3 font-bold">${v.totalItem}</td>
+                    <td class="p-3 font-bold text-emerald-600">Rp ${v.totalHarga.toLocaleString('id-ID')}</td>
+                    <td class="p-3 text-slate-500">${v.keterangan}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if(Object.keys(vendorMap).length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Belum ada data akumulasi vendor.</td></tr>`;
+            }
+            openModal('modal-vendor-akumulasi');
+        }
+
+
+        // ================= 4. FITUR STOK BARANG & KELUAR =================
+        function calculateStockMap() {
+            let stockMap = {}; // key: nama_spesifikasi
+
+            // 1. Tambah dari Barang Masuk
+            appData.barangMasuk.forEach(bm => {
+                bm.items.forEach(i => {
+                    let key = `${i.nama}_${i.spesifikasi || ''}`.trim().toLowerCase();
+                    if(!stockMap[key]) {
+                        stockMap[key] = { tglMasuk: bm.tanggal, nama: i.nama, spesifikasi: i.spesifikasi || '-', sat: i.sat, totalMasuk: 0, totalKeluar: 0, saldo: 0 };
+                    }
+                    stockMap[key].totalMasuk += Number(i.qty);
+                });
+            });
+
+            // 2. Kurangi dari Barang Keluar
+            appData.barangKeluar.forEach(bk => {
+                bk.items.forEach(i => {
+                    let key = `${i.nama}_${i.spesifikasi || ''}`.trim().toLowerCase();
+                    if(stockMap[key]) {
+                        stockMap[key].totalKeluar += Number(i.qty);
+                    } else {
+                        // Jika keluar tanpa catatan masuk sebelumnya
+                        stockMap[key] = { tglMasuk: '-', nama: i.nama, spesifikasi: i.spesifikasi || '-', sat: i.sat, totalMasuk: 0, totalKeluar: Number(i.qty), saldo: 0 };
+                    }
+                });
+            });
+
+            // 3. Hitung Saldo Akhir
+            Object.keys(stockMap).forEach(k => {
+                stockMap[k].saldo = stockMap[k].totalMasuk - stockMap[k].totalKeluar;
+            });
+
+            return stockMap;
+        }
+
+        function renderTableStokGudang() {
+            const tbody = document.getElementById('table-stok-gudang-body');
+            tbody.innerHTML = '';
+
+            let stockMap = calculateStockMap();
+            let keys = Object.keys(stockMap);
+
+            if(keys.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">Belum ada data stok gudang.</td></tr>`;
+                return;
+            }
+
+            keys.forEach(k => {
+                let s = stockMap[k];
+                let statusBadge = s.saldo > 0 
+                    ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Tersedia (${s.saldo})</span>`
+                    : `<span class="bg-rose-100 text-rose-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Habis (0)</span>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3">${s.tglMasuk}</td>
+                    <td class="p-3 font-bold text-slate-900">${s.nama}</td>
+                    <td class="p-3 text-slate-600">${s.spesifikasi}</td>
+                    <td class="p-3">${s.sat}</td>
+                    <td class="p-3 font-bold text-emerald-600">${s.totalMasuk}</td>
+                    <td class="p-3 font-bold text-purple-600">${s.totalKeluar}</td>
+                    <td class="p-3 font-bold text-indigo-600">${s.saldo}</td>
+                    <td class="p-3 text-center">${statusBadge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function openModalBarangKeluar() {
+            document.getElementById('form-barang-keluar').reset();
+            document.getElementById('keluar-edit-index').value = '';
+            document.getElementById('keluar-items-container').innerHTML = '';
+            addKeluarItemRow();
+            openModal('modal-barang-keluar');
+        }
+
+        function addKeluarItemRow(nama='', spesifikasi='', qty='', sat='') {
+            const container = document.getElementById('keluar-items-container');
+            const rowId = 'keluar_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
+
+            let stockMap = calculateStockMap();
+            let barangOptions = Object.values(stockMap).map(s => `<option value="${s.nama}" data-spec="${s.spesifikasi}" data-sat="${s.sat}">${s.nama} (${s.spesifikasi}) - Saldo: ${s.saldo} ${s.sat}</option>`).join('');
+
+            const html = `
+                <div id="${rowId}" class="flex flex-col sm:flex-row gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div class="w-full sm:w-1/3">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Nama Barang</label>
+                        <select name="nama" onchange="onKeluarBarangChange(this)" required class="w-full p-1.5 border border-slate-300 rounded text-xs">
+                            <option value="">-- Pilih Barang Stok --</option>
+                            ${barangOptions}
+                        </select>
+                    </div>
+                    <div class="w-full sm:w-1/4">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Spesifikasi</label>
+                        <input type="text" name="spesifikasi" value="${spesifikasi}" readonly placeholder="Otomatis spec" class="w-full p-1.5 bg-slate-100 border border-slate-300 rounded text-xs spec-field">
+                    </div>
+                    <div class="w-20">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Qty Keluar</label>
+                        <input type="number" step="any" name="qty" value="${qty}" required placeholder="Qty" class="w-full p-1.5 border border-slate-300 rounded text-xs">
+                    </div>
+                    <div class="w-20">
+                        <label class="block text-[10px] text-slate-500 font-semibold mb-0.5 sm:hidden">Satuan</label>
+                        <input type="text" name="sat" value="${sat}" readonly placeholder="Sat" class="w-full p-1.5 bg-slate-100 border border-slate-300 rounded text-xs sat-field">
+                    </div>
+                    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-rose-500 hover:text-rose-700 p-1.5"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            lucide.createIcons();
+        }
+
+        function onKeluarBarangChange(selectEl) {
+            const row = selectEl.closest('div.flex');
+            const selectedOpt = selectEl.options[selectEl.selectedIndex];
+            const spec = selectedOpt.getAttribute('data-spec') || '';
+            const sat = selectedOpt.getAttribute('data-sat') || '';
+
+            row.querySelector('.spec-field').value = spec;
+            row.querySelector('.sat-field').value = sat;
+        }
+
+        function saveBarangKeluar(e) {
+            e.preventDefault();
+            const editIdx = document.getElementById('keluar-edit-index').value;
+            const tgl = document.getElementById('keluar-tgl').value;
+            const pengambil = document.getElementById('keluar-pengambil').value;
+            const petugas = document.getElementById('keluar-petugas').value;
+
+            const itemRows = document.querySelectorAll('#keluar-items-container > div');
+            if(itemRows.length === 0) {
+                alert("Harap masukkan minimal 1 item pengeluaran!");
+                return;
+            }
+
+            let items = [];
+            itemRows.forEach(row => {
+                items.push({
+                    nama: row.querySelector('[name="nama"]').value,
+                    spesifikasi: row.querySelector('[name="spesifikasi"]').value,
+                    qty: Number(row.querySelector('[name="qty"]').value),
+                    sat: row.querySelector('[name="sat"]').value
+                });
+            });
+
+            if(editIdx !== '') {
+                appData.barangKeluar[editIdx] = { id: 'BK-' + Date.now(), tanggal: tgl, pengambil, petugas, items };
+            } else {
+                appData.barangKeluar.unshift({ id: 'BK-' + Date.now(), tanggal: tgl, pengambil, petugas, items });
+            }
+
+            saveLocalStorage();
+            closeModal('modal-barang-keluar');
+            refreshAllViews();
+        }
+
+        function renderTablePengambilan() {
+            const keyword = document.getElementById('search-pengambilan').value.toLowerCase();
+            const tbody = document.getElementById('table-pengambilan-body');
+            tbody.innerHTML = '';
+
+            let filtered = appData.barangKeluar.filter(bk => bk.items.some(i => i.nama.toLowerCase().includes(keyword) || bk.pengambil.toLowerCase().includes(keyword)));
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">Tidak ada riwayat pengambilan barang.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((bk, bkIdx) => {
+                bk.items.forEach((item, itemIdx) => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition";
+                    tr.innerHTML = `
+                        <td class="p-3">${bk.tanggal}</td>
+                        <td class="p-3 font-bold text-slate-900">${bk.pengambil}</td>
+                        <td class="p-3 font-semibold text-purple-600">${item.nama}</td>
+                        <td class="p-3 text-slate-600">${item.spesifikasi || '-'}</td>
+                        <td class="p-3 font-bold">${item.qty} ${item.sat}</td>
+                        <td class="p-3 text-slate-500">${bk.keterangan || '-'}</td>
+                        <td class="p-3 text-slate-700">${bk.petugas}</td>
+                        <td class="p-3 text-center whitespace-nowrap">
+                            <button onclick="deleteBarangKeluarItem(${bkIdx}, ${itemIdx})" title="Hapus" class="p-1 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+            lucide.createIcons();
+        }
+
+        function deleteBarangKeluarItem(bkIdx, itemIdx) {
+            if(confirm("Hapus catatan pengambilan ini?")) {
+                appData.barangKeluar[bkIdx].items.splice(itemIdx, 1);
+                if(appData.barangKeluar[bkIdx].items.length === 0) {
+                    appData.barangKeluar.splice(bkIdx, 1);
+                }
+                saveLocalStorage();
+                refreshAllViews();
+            }
+        }
+
+
+        // ================= 5. EXPORT & IMPORT JSON / EXCEL =================
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
             const dlAnchor = document.createElement('a');
             dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `logistikpro_backup_${new Date().toISOString().slice(0,10)}.json`);
+            dlAnchor.setAttribute("download", `LogistikPRO_Backup_${new Date().toISOString().split('T')[0]}.json`);
             document.body.appendChild(dlAnchor);
             dlAnchor.click();
             dlAnchor.remove();
         }
 
-        // Import Data JSON (Restore)
-        function importData(event) {
-            const fileReader = new FileReader();
-            if(event.target.files[0]) {
-                fileReader.readAsText(event.target.files[0], "UTF-8");
-                fileReader.onload = e => {
-                    try {
-                        const parsed = JSON.parse(e.target.result);
-                        if(parsed.spp && parsed.masuk && parsed.retur) {
-                            db = parsed;
-                            saveDataLocal();
-                            renderDashboard();
-                            alert('Data berhasil dipulihkan!');
-                        } else {
-                            alert('Format file backup tidak valid.');
-                        }
-                    } catch (err) {
-                        alert('Gagal membaca file JSON.');
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if(parsed.spp && parsed.barangMasuk && parsed.barangKeluar) {
+                        appData = parsed;
+                        saveLocalStorage();
+                        refreshAllViews();
+                        alert("Data JSON berhasil diimport dan disinkronkan!");
+                    } else {
+                        alert("Format file JSON tidak valid.");
                     }
-                };
-            }
+                } catch(err) {
+                    alert("Gagal membaca file JSON: " + err);
+                }
+            };
+            reader.readAsText(file);
         }
 
-        // Export Excel Stok
-        function exportExcelStok() {
-            const summary = calculateStockSummary();
-            if(summary.length === 0) {
-                alert('Tidak ada data stok untuk diexport.');
-                return;
-            }
-            const dataToExcel = summary.map((s, idx) => ({
-                "No": idx + 1,
-                "Nama Barang": s.nama,
-                "Total Masuk": s.masuk,
-                "Total Keluar/Retur": s.keluar,
-                "Stok Akhir": s.masuk - s.keluar,
-                "Satuan": s.satuan
-            }));
+        function exportExcelMultiSheet() {
+            // Membuat CSV Multi-Sheet dalam 1 file (Format CSV gabungan sections)
+            let csvContent = "\ufeff=== SHEET 1: SPP & REALISASI ===\n";
+            csvContent += "No SPP,Tgl SPP,Pengaju,Nama Barang,Spesifikasi,Qty,Satuan,Total Realisasi,Status,Keterangan\n";
+            
+            appData.spp.forEach(s => {
+                s.items.forEach(i => {
+                    let totalRe = i.realisasi ? i.realisasi.reduce((a,b)=>a+Number(b.qty),0) : 0;
+                    let stat = totalRe >= i.qty ? 'Terpenuhi' : 'Kurang';
+                    csvContent += `"${s.id}","${s.tanggal}","${s.pengaju}","${i.nama}","${i.spesifikasi || ''}",${i.qty},"${i.sat}",${totalRe},"${stat}","${s.keterangan || ''}"\n`;
+                });
+            });
 
-            const worksheet = XLSX.utils.json_to_sheet(dataToExcel);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Stok Gudang");
-            XLSX.writeFile(workbook, `Rekap_Stok_LogistikPRO_${new Date().toISOString().slice(0,10)}.xlsx`);
+            csvContent += "\n=== SHEET 2: BARANG MASUK ===\n";
+            csvContent += "Tanggal,Vendor,Nama Barang,Spesifikasi,Qty,Satuan,Harsat,Total Harga,Keterangan\n";
+            appData.barangMasuk.forEach(bm => {
+                bm.items.forEach(i => {
+                    csvContent += `"${bm.tanggal}","${bm.vendor}","${i.nama}","${i.spesifikasi || ''}",${i.qty},"${i.sat}",${i.harsat},${i.qty * i.harsat},"${bm.keterangan || ''}"\n`;
+                });
+            });
+
+            csvContent += "\n=== SHEET 3: STOK GUDANG & PENGAMBILAN ===\n";
+            let stockMap = calculateStockMap();
+            csvContent += "Nama Barang,Spesifikasi,Satuan,Total Masuk,Total Keluar,Saldo Akhir\n";
+            Object.values(stockMap).forEach(s => {
+                csvContent += `"${s.nama}","${s.spesifikasi}","${s.sat}",${s.totalMasuk},${s.totalKeluar},${s.saldo}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `LogistikPRO_Export_Lengkap_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
         }
 
-        function resetAllData() {
-            if(confirm('PERINGATAN: Tindakan ini akan menghapus seluruh data SPP, Barang Masuk, dan Retur secara permanen. Lanjutkan?')) {
-                localStorage.clear();
-                db = { spp: [], masuk: [], retur: [] };
-                renderDashboard();
-                alert('Semua data berhasil direset.');
-            }
+        function openShareModal() {
+            openModal('modal-share');
         }
 
-        // Initial Load
-        renderDashboard();
+
+        // ================= 6. RESIZABLE TABLE COLUMNS =================
+        function initResize(e) {
+            const th = e.target.parentElement;
+            const startX = e.pageX;
+            const startWidth = th.offsetWidth;
+
+            function onMouseMove(event) {
+                const width = startWidth + (event.pageX - startX);
+                if(width > 40) {
+                    th.style.width = width + 'px';
+                }
+            }
+
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
     </script>
 </body>
 </html>
