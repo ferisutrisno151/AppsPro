@@ -2,6 +2,10 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <script>
+      const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw0-Ca2FUGCXznEhAPODqSPxFSl9vbDRs6_mzPadG6UvnKre0eEH6oecG6wZXqnbGXNUw/exec";
+    </script>
+    <!-- sisa kode head lainnya -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LogistikPro Monitoring System</title>
     <!-- Tailwind CSS CDN -->
@@ -1294,7 +1298,7 @@
             container.appendChild(div);
         }
 
-        function saveSppForm(e) {
+        function saveSppForm(e) { 
             e.preventDefault();
             const editIdx = document.getElementById('sppEditIndex').value;
             const noSpp = document.getElementById('sppNo').value;
@@ -1337,13 +1341,22 @@
                 db.spp.push(sppObj);
             }
 
-            saveData();
-            closeSppModal();
-        }
+           saveData();
+    closeSppModal();
+    
+    // Kirim data SPP terbaru ke Google Sheets di sini:
+    saveDataToCloud("SPP", [
+        noSpp,
+        tglSpp,
+        pengaju,
+        items,
+        keterangan
+    ]);
+}
 
-        function editSpp(idx) {
-            openSppModal(idx);
-        }
+function editSpp(idx) {
+    openSppModal(idx);
+}
 
         function deleteSpp(idx) {
             if(confirm('Apakah Anda yakin ingin menghapus data SPP ini?')) {
@@ -1885,6 +1898,46 @@
             a.click();
             a.remove();
         }
+        async function loadDataFromCloud() {
+    try {
+        // Contoh mengambil data untuk tab SPP
+        let response = await fetch(`${WEB_APP_URL}?sheet=SPP`);
+        let result = await response.json();
+        
+        if(Array.isArray(result)) {
+            db.spp = result; // Masukkan ke dalam objek data aplikasi Anda
+            renderSppTable(); // Refresh tampilan tabel SPP
+        }
+        
+        // Lakukan hal yang sama untuk sheet lainnya jika diperlukan
+    } catch (error) {
+        console.error("Gagal memuat data dari cloud:", error);
+    }
+}
+        async function saveDataToCloud(sheetName, valuesArray) {
+    try {
+        let payload = {
+            action: "save",
+            sheet: sheetName,
+            values: valuesArray
+        };
+
+        let response = await fetch(WEB_APP_URL, {
+            method: "POST",
+            mode: "no-cors", // Menghindari masalah CORS di browser
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        alert("Data berhasil disimpan ke Cloud Google Sheets!");
+        loadDataFromCloud(); // Muat ulang data terbaru
+    } catch (error) {
+        console.error("Gagal menyimpan data:", error);
+        alert("Terjadi kesalahan saat menyimpan data.");
+    }
+}
 
         // Export Multi-Sheet Excel via SheetJS
         function exportToExcel() {
@@ -1940,8 +1993,12 @@
             XLSX.utils.book_append_sheet(wb, wsSt, "Kartu Stok");
 
             // Simpan File Excel
-            XLSX.writeFile(wb, `LogistikPro_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
-        }
+    XLSX.writeFile(wb, `LogistikPro_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+// === TAMBAHKAN PEMANGGILAN INI DI SINI ===
+loadDataFromCloud();
+
     </script>
 </body>
 </html>
