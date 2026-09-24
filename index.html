@@ -1573,49 +1573,68 @@ function editSpp(idx) {
 
         // Akumulasi per Vendor Modal
         function openAkumulasiVendorModal() {
-            const modal = document.getElementById('akumulasiVendorModal');
-            modal.classList.remove('hidden');
-            const tbody = document.getElementById('akumulasiVendorTableBody');
-            tbody.innerHTML = '';
+    const modal = document.getElementById('akumulasiVendorModal');
+    modal.classList.remove('hidden');
+    const tbody = document.getElementById('akumulasiVendorTableBody');
+    tbody.innerHTML = '';
 
-            // Grouping by Vendor
-            let vendorMap = {};
-            db.barangMasuk.forEach(bm => {
-                let v = bm.vendor.trim();
-                if(!vendorMap[v]) {
-                    vendorMap[v] = { totalItems: 0, totalHarga: 0, rincianSet: new Set(), ketList: [] };
-                }
-                bm.items.forEach(i => {
-                    let qty = Number(i.qty || 0);
-                    let harsat = Number(i.harsat || 0);
-                    vendorMap[v].totalItems += qty;
-                    vendorMap[v].totalHarga += (qty * harsat);
-                    vendorMap[v].rincianSet.add(`${i.namaBarang} (${qty} ${i.sat})`);
-                    if(i.keterangan) vendorMap[v].ketList.push(i.keterangan);
-                });
-            });
+    // Grouping by Vendor & Tanggal
+    let vendorMap = {};
+    
+    db.barangMasuk.forEach(b => {
+        let v = (b.vendor || '').trim();
+        // Ambil tanggal dari data (sesuaikan nama properti tanggal Anda, misal b.tanggal atau b.tglMasuk)
+        let tgl = (b.tanggal || '').trim(); 
+        
+        // Buat kunci unik gabungan vendor dan tanggal
+        let key = `${v}_${tgl}`;
 
-            let vendors = Object.keys(vendorMap);
-            if(vendors.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">Belum ada data akumulasi vendor.</td></tr>`;
-                return;
+        if (key) {
+            if (!vendorMap[key]) {
+                vendorMap[key] = { 
+                    vendor: v, 
+                    tanggal: tgl, 
+                    totalItems: 0, 
+                    totalHarga: 0, 
+                    rincianSet: new Set(), 
+                    ketlist: [] 
+                };
             }
 
-            vendors.forEach((v, idx) => {
-                let data = vendorMap[v];
-                let rincianStr = Array.from(data.rincianSet).join(', ');
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                        <td class="p-3 text-center font-medium text-slate-500">${idx + 1}</td>
-                        <td class="p-3 font-bold text-slate-900">${v}</td>
-                        <td class="p-3 text-slate-600">${rincianStr}</td>
-                        <td class="p-3 text-center font-bold">${data.totalItems.toLocaleString()} Item</td>
-                        <td class="p-3 text-right font-bold text-emerald-600">Rp ${data.totalHarga.toLocaleString('id-ID')}</td>
-                        <td class="p-3 text-slate-500">${data.ketList.join(', ') || '-'}</td>
-                    </tr>
-                `;
+            b.items.forEach(i => {
+                let qty = Number(i.qty) || 0;
+                let harsat = Number(i.harsat) || 0;
+                vendorMap[key].totalItems += qty;
+                vendorMap[key].totalHarga += (qty * harsat);
+                vendorMap[key].rincianSet.add(`${i.namaBarang} (${i.satuan})`);
+                if (i.keterangan) vendorMap[key].ketlist.push(i.keterangan);
             });
         }
+    });
+
+    let keys = Object.keys(vendorMap);
+    if (keys.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400">Belum ada data akumulasi vendor & tanggal.</td></tr>`;
+        return;
+    }
+
+    keys.forEach((k, idx) => {
+        let data = vendorMap[k];
+        let rincianStr = Array.from(data.rincianSet).join(', ');
+        
+        tbody.innerHTML += `
+            <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                <td class="p-3 text-center font-medium text-slate-500">${idx + 1}</td>
+                <td class="p-3 text-slate-600">${data.tanggal}</td>
+                <td class="p-3 font-bold text-slate-800">${data.vendor}</td>
+                <td class="p-3 text-slate-600">${rincianStr}</td>
+                <td class="p-3 text-center font-bold text-slate-600">${data.totalItems.toLocaleString('id-ID')}</td>
+                <td class="p-3 text-right font-bold text-emerald-600">Rp ${data.totalHarga.toLocaleString('id-ID')}</td>
+                <td class="p-3 text-slate-500">${data.ketlist.join(', ')}</td>
+            </tr>
+        `;
+    });
+}
         function closeAkumulasiVendorModal() {
             document.getElementById('akumulasiVendorModal').classList.add('hidden');
         }
