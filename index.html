@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogistikPRO & ProARK Terpadu</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js untuk Grafik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-100 font-sans antialiased text-slate-800">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar Navigasi -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex">
+            <div>
+                <div class="p-5 flex items-center space-x-3 border-b border-slate-800">
+                    <div class="bg-indigo-600 text-white p-2 rounded-lg font-bold text-lg">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-white tracking-wide">PRO-SYSTEM</h1>
+                        <p class="text-xs text-slate-400">Logistik & Asset Tracker</p>
+                    </div>
+                </div>
+                <nav class="p-4 space-y-1">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-medium transition bg-indigo-600 text-white">
+                        <i class="fa-solid fa-chart-pie w-5"></i>
+                        <span>Dashboard Utama</span>
+                    </button>
+                    <button onclick="switchTab('logistik')" id="nav-logistik" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-medium transition hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-truck-ramp-box w-5"></i>
+                        <span>LogistikPRO (PR & Stok)</span>
+                    </button>
+                    <button onclick="switchTab('proark')" id="nav-proark" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-medium transition hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-toolbox w-5"></i>
+                        <span>ProARK (Inventaris Alat)</span>
+                    </button>
+                </nav>
+            </div>
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                v2.5.0 - Integrated APK Ready
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <!-- Top Mobile Bar / Header -->
+            <header class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+                <div class="flex items-center space-x-4">
+                    <h2 id="page-title" class="text-xl font-bold text-slate-800">Dashboard Utama</h2>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                        <span class="w-2 h-2 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Sistem Online
+                    </span>
+                    <div class="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+                        AD
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Container -->
+            <main class="p-6">
+
+                <!-- TAB 1: DASHBOARD -->
+                <section id="tab-dashboard" class="space-y-6 tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Material Masuk</p>
+                                <h3 class="text-2xl font-bold text-slate-900 mt-1">1,280 Ton</h3>
+                            </div>
+                            <div class="p-3 bg-indigo-50 text-indigo-600 rounded-lg"><i class="fa-solid fa-arrow-down text-xl"></i></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Purchase Request Pending</p>
+                                <h3 class="text-2xl font-bold text-amber-600 mt-1">5 Item</h3>
+                            </div>
+                            <div class="p-3 bg-amber-50 text-amber-600 rounded-lg"><i class="fa-solid fa-clock text-xl"></i></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Alat Berat Aktif (ProARK)</p>
+                                <h3 class="text-2xl font-bold text-emerald-600 mt-1">14 Unit</h3>
+                            </div>
+                            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fa-solid fa-tractor text-xl"></i></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Alat Maintenance</p>
+                                <h3 class="text-2xl font-bold text-rose-600 mt-1">2 Unit</h3>
+                            </div>
+                            <div class="p-3 bg-rose-50 text-rose-600 rounded-lg"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- Chart & Quick Links -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <h3 class="font-bold text-slate-800 mb-4">Grafik Arus Logistik Bulanan</h3>
+                            <div class="h-72">
+                                <canvas id="logisticChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-slate-800 mb-3">Akses Cepat Modul</h3>
+                                <p class="text-sm text-slate-500 mb-4">Pilih modul di bawah untuk langsung mengelola data operasional proyek.</p>
+                            </div>
+                            <div class="space-y-3">
+                                <button onclick="switchTab('logistik')" class="w-full py-3 px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded-lg flex items-center justify-between transition">
+                                    <span><i class="fa-solid fa-file-invoice mr-2"></i> Buat Purchase Request</span>
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </button>
+                                <button onclick="switchTab('proark')" class="w-full py-3 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold rounded-lg flex items-center justify-between transition">
+                                    <span><i class="fa-solid fa-plus-circle mr-2"></i> Tambah Alat / Aset Baru</span>
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 2: LOGISTIKPRO -->
+                <section id="tab-logistik" class="space-y-6 tab-content hidden">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800">Manajemen Logistik & Purchase Request</h3>
+                            <p class="text-sm text-slate-500">Kelola permintaan barang material dan kartu stok gudang proyek.</p>
+                        </div>
+                        <button onclick="openModal('modalPR')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition">
+                            <i class="fa-solid fa-plus mr-2"></i> Buat PR Baru
+                        </button>
+                    </div>
+
+                    <!-- Tabel Purchase Request -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-4 border-b border-slate-200 font-bold text-slate-800">Daftar Purchase Request (PR) Aktif</div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-600 border-b border-slate-200">
+                                        <th class="p-3">No. PR</th>
+                                        <th class="p-3">Tanggal</th>
+                                        <th class="p-3">Nama Material</th>
+                                        <th class="p-3">Jumlah</th>
+                                        <th class="p-3">Pemohon</th>
+                                        <th class="p-3">Status</th>
+                                        <th class="p-3">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-pr-body" class="divide-y divide-slate-100">
+                                    <tr>
+                                        <td class="p-3 font-medium">PR-2026-001</td>
+                                        <td class="p-3">03 Okt 2026</td>
+                                        <td class="p-3">Semen Portland (Zak)</td>
+                                        <td class="p-3">250 Zak</td>
+                                        <td class="p-3">Ahmad (Supervisor)</td>
+                                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Pending Approval</span></td>
+                                        <td class="p-3 space-x-2">
+                                            <button onclick="alert('Cetak Surat Jalan / PR')" class="text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-print"></i></button>
+                                            <button onclick="alert('Hapus Data')" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 3: PROARK -->
+                <section id="tab-proark" class="space-y-6 tab-content hidden">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800">Inventaris Alat & Aset Proyek (ProARK)</h3>
+                            <p class="text-sm text-slate-500">Monitor status alat berat, lokasi penempatan, dan riwayat pemeliharaan.</p>
+                        </div>
+                        <button onclick="openModal('modalAlat')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition">
+                            <i class="fa-solid fa-plus mr-2"></i> Tambah Alat
+                        </button>
+                    </div>
+
+                    <!-- Tabel Inventaris Alat -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-4 border-b border-slate-200 font-bold text-slate-800">Daftar Alat Berat & Perkakas Proyek</div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-600 border-b border-slate-200">
+                                        <th class="p-3">Kode Alat</th>
+                                        <th class="p-3">Nama Alat / Merk</th>
+                                        <th class="p-3">Kategori</th>
+                                        <th class="p-3">Lokasi Site</th>
+                                        <th class="p-3">Kondisi / Status</th>
+                                        <th class="p-3">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-alat-body" class="divide-y divide-slate-100">
+                                    <tr>
+                                        <td class="p-3 font-medium">EQ-EX-01</td>
+                                        <td class="p-3">Excavator Komatsu PC200</td>
+                                        <td class="p-3">Alat Berat</td>
+                                        <td class="p-3">Zone A (Cut & Fill)</td>
+                                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Beroperasi</span></td>
+                                        <td class="p-3 space-x-2">
+                                            <button onclick="alert('Detail Alat & Log Maintenance')" class="text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-eye"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium">EQ-CR-02</td>
+                                        <td class="p-3">Mobile Crane 25 Ton</td>
+                                        <td class="p-3">Alat Angkat</td>
+                                        <td class="p-3">Zone B (Piling Area)</td>
+                                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">Maintenance</span></td>
+                                        <td class="p-3 space-x-2">
+                                            <button onclick="alert('Detail Alat & Log Maintenance')" class="text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-eye"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Form PR (LogistikPRO) -->
+    <div id="modalPR" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-lg text-slate-800">Form Purchase Request (LogistikPRO)</h3>
+                <button onclick="closeModal('modalPR')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="formPR" onsubmit="submitPR(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nama Material / Barang</label>
+                    <input type="text" id="pr-nama" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Contoh: Besi Beton Dia 16mm">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Jumlah</label>
+                        <input type="number" id="pr-jumlah" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="100">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Satuan</label>
+                        <input type="text" id="pr-satuan" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Batang / Ton / Zak">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nama Pemohon / Supervisor</label>
+                    <input type="text" id="pr-pemohon" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Nama Anda">
+                </div>
+                <div class="flex justify-end space-x-3 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modalPR')" class="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">Simpan PR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Form Alat (ProARK) -->
+    <div id="modalAlat" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-lg text-slate-800">Tambah Alat / Aset (ProARK)</h3>
+                <button onclick="closeModal('modalAlat')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="formAlat" onsubmit="submitAlat(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Kode Alat</label>
+                        <input type="text" id="alat-kode" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="EQ-EX-03">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Kategori</label>
+                        <select id="alat-kategori" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option>Alat Berat</option>
+                            <option>Alat Angkat</option>
+                            <option>Perkakas Ringan</option>
+                            <option>Kendaraan Operasional</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nama Alat & Merk</label>
+                    <input type="text" id="alat-nama" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Excavator CAT 320D">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Lokasi Site</label>
+                        <input type="text" id="alat-lokasi" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Zone C">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Status</label>
+                        <select id="alat-status" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option value="Beroperasi">Beroperasi</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Standby">Standby</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modalAlat')" class="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700">Simpan Alat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script Logika & Interaksi -->
+    <script>
+        // Navigasi Tab
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            // Reset active style sidebar buttons
+            ['dashboard', 'logistik', 'proark'].forEach(id => {
+                const btn = document.getElementById('nav-' + id);
+                btn.className = "w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-medium transition hover:bg-slate-800 hover:text-white text-slate-300";
+            });
+
+            const activeBtn = document.getElementById('nav-' + tabId);
+            activeBtn.className = "w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-medium transition bg-indigo-600 text-white";
+
+            // Update Page Title
+            const titles = {
+                'dashboard': 'Dashboard Utama',
+                'logistik': 'LogistikPRO (Purchase Request & Stok)',
+                'proark': 'ProARK (Inventaris Alat & Aset Proyek)'
+            };
+            document.getElementById('page-title').innerText = titles[tabId];
+        }
+
+        // Modal Handler
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Submit PR Handler
+        function submitPR(e) {
+            e.preventDefault();
+            const nama = document.getElementById('pr-nama').value;
+            const jumlah = document.getElementById('pr-jumlah').value;
+            const satuan = document.getElementById('pr-satuan').value;
+            const pemohon = document.getElementById('pr-pemohon').value;
+
+            const tbody = document.getElementById('table-pr-body');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="p-3 font-medium">PR-2026-00${tbody.children.length + 1}</td>
+                <td class="p-3">03 Okt 2026</td>
+                <td class="p-3">${nama}</td>
+                <td class="p-3">${jumlah} ${satuan}</td>
+                <td class="p-3">${pemohon}</td>
+                <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Pending Approval</span></td>
+                <td class="p-3 space-x-2">
+                    <button onclick="alert('Cetak Surat Jalan / PR')" class="text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-print"></i></button>
+                    <button onclick="this.closest('tr').remove()" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(row);
+            closeModal('modalPR');
+            document.getElementById('formPR').reset();
+            alert('Purchase Request berhasil ditambahkan!');
+        }
+
+        // Submit Alat Handler
+        function submitAlat(e) {
+            e.preventDefault();
+            const kode = document.getElementById('alat-kode').value;
+            const kategori = document.getElementById('alat-kategori').value;
+            const nama = document.getElementById('alat-nama').value;
+            const lokasi = document.getElementById('alat-lokasi').value;
+            const status = document.getElementById('alat-status').value;
+
+            let badgeColor = "bg-emerald-100 text-emerald-800";
+            if(status === 'Maintenance') badgeColor = "bg-rose-100 text-rose-800";
+            if(status === 'Standby') badgeColor = "bg-amber-100 text-amber-800";
+
+            const tbody = document.getElementById('table-alat-body');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="p-3 font-medium">${kode}</td>
+                <td class="p-3">${nama}</td>
+                <td class="p-3">${kategori}</td>
+                <td class="p-3">${lokasi}</td>
+                <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badgeColor}">${status}</span></td>
+                <td class="p-3 space-x-2">
+                    <button onclick="alert('Detail Alat')" class="text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-eye"></i></button>
+                    <button onclick="this.closest('tr').remove()" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(row);
+            closeModal('modalAlat');
+            document.getElementById('formAlat').reset();
+            alert('Alat / Aset baru berhasil ditambahkan ke ProARK!');
+        }
+
+        // Grafik Chart.js
+        window.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('logisticChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt'],
+                    datasets: [{
+                        label: 'Volume Material Masuk (Ton)',
+                        data: [650, 800, 950, 1100, 1250, 900, 1400, 1350, 1200, 1280],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
