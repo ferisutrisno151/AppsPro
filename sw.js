@@ -1,6 +1,6 @@
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open('appspro-store').then((cache) => {
+    caches.open('appspro-cache').then((cache) => {
       return cache.addAll(['./index.html', './manifest.json', './icon-512.png']);
     })
   );
