@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>AppsPro - Integrated Systems</title>
   
-  <!-- PWA Manifest Link -->
+  <!-- PWA Manifest & Meta -->
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon-512.png">
   <meta name="theme-color" content="#0f172a">
@@ -53,7 +53,7 @@
         </button>
       </div>
 
-      <!-- Navigasi Menu & Tombol Aksi Tepat di Bawahnya -->
+      <!-- Navigasi Menu & Tombol Aksi -->
       <nav class="p-2.5 space-y-1.5">
         <!-- LogistikPro -->
         <button onclick="switchApp('logistikpro')" id="btn-logistikpro" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium bg-indigo-600 text-white shadow-sm">
@@ -67,7 +67,7 @@
           <span>ArkPro</span>
         </button>
 
-        <!-- PEMBATAS & TOMBOL SHARE / DOWNLOAD TEPAT DI BAWAH ARKPRO -->
+        <!-- PEMBATAS & TOMBOL SHARE / DOWNLOAD -->
         <div class="pt-3 pb-1">
           <div class="border-t border-slate-800 my-2"></div>
           <span class="text-[10px] font-semibold text-slate-500 tracking-wider uppercase px-1">Sistem & Bagikan</span>
@@ -87,25 +87,20 @@
       </nav>
     </div>
 
-    <!-- Footer Copyright di Bawah Sendiri -->
+    <!-- Footer Copyright -->
     <div class="p-3 border-t border-slate-800/80 text-[10px] text-slate-500 text-center">
       AppsPro System &copy; 2026
     </div>
   </aside>
 
-  <!-- KONTEN UTAMA (TAMPILAN APLIKASI PENUH) -->
+  <!-- KONTEN UTAMA (IFRAME) -->
   <main class="w-full h-full relative bg-slate-900">
-    
-    <!-- FRAME LOGISTIKPRO -->
     <div id="frame-logistikpro" class="iframe-container w-full h-full absolute inset-0">
       <iframe src="https://ferisutrisno151.github.io/LogistikPro/" title="LogistikPro"></iframe>
     </div>
-
-    <!-- FRAME ARKPRO (Pastikan URL sesuai huruf besar/kecil dengan repo ArkPro Anda) -->
     <div id="frame-arkpro" class="iframe-container w-full h-full absolute inset-0 hidden">
       <iframe src="https://ferisutrisno151.github.io/ArkPro/" title="ArkPro"></iframe>
     </div>
-
   </main>
 
   <script>
@@ -126,20 +121,17 @@
     function switchApp(app) {
       const logistikFrame = document.getElementById('frame-logistikpro');
       const arkproFrame = document.getElementById('frame-arkpro');
-      
       const btnLogistik = document.getElementById('btn-logistikpro');
       const btnArkpro = document.getElementById('btn-arkpro');
 
       if (app === 'logistikpro') {
         logistikFrame.classList.remove('hidden');
         arkproFrame.classList.add('hidden');
-
         btnLogistik.className = "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium bg-indigo-600 text-white shadow-sm";
         btnArkpro.className = "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white";
       } else if (app === 'arkpro') {
         arkproFrame.classList.remove('hidden');
         logistikFrame.classList.add('hidden');
-
         btnArkpro.className = "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium bg-purple-600 text-white shadow-sm";
         btnLogistik.className = "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white";
       }
@@ -150,10 +142,9 @@
     function shareApp() {
       const shareData = {
         title: 'AppsPro Portal',
-        text: 'Silakan akses Portal AppsPro (Logistik & Inventaris Alat) melalui link berikut:',
+        text: 'Silakan akses Portal AppsPro melalui link berikut:',
         url: window.location.href
       };
-
       if (navigator.share) {
         navigator.share(shareData).catch(() => {});
       } else {
