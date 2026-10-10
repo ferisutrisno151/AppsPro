@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>AppsPro - Integrated Systems</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,13 +15,21 @@
     }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 h-screen flex overflow-hidden">
+<body class="bg-slate-900 text-slate-100 h-screen w-screen overflow-hidden relative">
 
-  <!-- SIDEBAR UTAMA APPSPRO -->
-  <aside id="sidebar" class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between transition-all duration-300 z-20">
+  <!-- TOMBOL HAMBURGER MENU (MELAYANG DI POJOK KIRI ATAS) -->
+  <button onclick="toggleSidebar()" class="absolute top-3 left-3 z-40 bg-slate-800/80 hover:bg-slate-700 text-white p-2.5 rounded-xl backdrop-blur-md shadow-lg border border-slate-700 flex items-center justify-center transition-all">
+    <i class="fa-solid fa-bars text-lg"></i>
+  </button>
+
+  <!-- OVERLAY BACKGROUND SAAT SIDEBAR BUKA -->
+  <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-sm transition-opacity"></div>
+
+  <!-- SIDEBAR OVERLAY / DRAWER -->
+  <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-slate-950 border-r border-slate-800 flex flex-col justify-between z-40 transform -translate-x-full transition-transform duration-300 shadow-2xl">
     <div>
       <!-- Header Logo AppsPro -->
-      <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between mt-12 sm:mt-0">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-indigo-500/30">
             AP
@@ -31,6 +39,9 @@
             <p class="text-xs text-slate-400">Portal Sistem Terpadu</p>
           </div>
         </div>
+        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-2 sm:hidden">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
       </div>
 
       <!-- Navigasi Menu Pilihan -->
@@ -53,8 +64,8 @@
     </div>
   </aside>
 
-  <!-- KONTEN UTAMA (TAMPILAN APLIKASI) -->
-  <main class="flex-1 h-full relative bg-slate-900">
+  <!-- KONTEN UTAMA (TAMPILAN APLIKASI PENUH) -->
+  <main class="w-full h-full relative bg-slate-900">
     
     <!-- FRAME LOGISTIKPRO -->
     <div id="frame-logistikpro" class="iframe-container w-full h-full absolute inset-0">
@@ -69,6 +80,20 @@
   </main>
 
   <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      
+      const isOpen = !sidebar.classList.contains('-translate-x-full');
+      if (isOpen) {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+      } else {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+      }
+    }
+
     function switchApp(app) {
       const logistikFrame = document.getElementById('frame-logistikpro');
       const arkproFrame = document.getElementById('frame-arkpro');
@@ -89,6 +114,9 @@
         btnArkpro.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium bg-purple-600 text-white shadow-md";
         btnLogistik.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium text-slate-400 hover:bg-slate-800 hover:text-white";
       }
+
+      // Tutup otomatis sidebar setelah menu dipilih di HP
+      toggleSidebar();
     }
   </script>
 </body>
