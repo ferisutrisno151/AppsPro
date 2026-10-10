@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>AppsPro - Integrated Systems</title>
+  
+  <!-- PWA Manifest Link -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-512.png">
+  <meta name="theme-color" content="#0f172a">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -20,19 +26,19 @@
 </head>
 <body class="bg-slate-900 text-slate-100 h-screen w-screen overflow-hidden relative">
 
-  <!-- TOMBOL HAMBURGER MENU -->
-  <button onclick="toggleSidebar()" class="absolute top-2.5 left-2.5 z-40 bg-slate-800/90 hover:bg-slate-700 text-white p-2 rounded-lg backdrop-blur-md shadow-md border border-slate-700/60 flex items-center justify-center transition-all">
-    <i class="fa-solid fa-bars text-base"></i>
+  <!-- TOMBOL HAMBURGER APPSPRO (DI POJOK KANAN BAWAH - AMAN DARI TABRAKAN) -->
+  <button onclick="toggleSidebar()" class="fixed bottom-6 right-6 z-[9999] bg-blue-600 hover:bg-blue-500 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all transform hover:scale-105 border-2 border-blue-400/40">
+    <i class="fa-solid fa-bars text-xl"></i>
   </button>
 
   <!-- OVERLAY BACKGROUND -->
-  <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-xs transition-opacity"></div>
+  <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-[9998] hidden backdrop-blur-xs transition-opacity"></div>
 
   <!-- SIDEBAR OVERLAY / DRAWER -->
-  <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between z-40 transform -translate-x-full transition-transform duration-300 shadow-2xl">
+  <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between z-[9999] transform -translate-x-full transition-transform duration-300 shadow-2xl">
     <div>
       <!-- Header Logo AppsPro -->
-      <div class="p-4 border-b border-slate-800/80 flex items-center justify-between mt-10 sm:mt-0">
+      <div class="p-4 border-b border-slate-800/80 flex items-center justify-between mt-2 sm:mt-0">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white text-sm shadow-md shadow-indigo-500/30">
             AP
@@ -42,7 +48,7 @@
             <p class="text-[10px] text-slate-400">Portal Sistem Terpadu</p>
           </div>
         </div>
-        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-1.5 sm:hidden">
+        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-1.5">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -95,9 +101,9 @@
       <iframe src="https://ferisutrisno151.github.io/LogistikPro/" title="LogistikPro"></iframe>
     </div>
 
-    <!-- FRAME ARKPRO -->
+    <!-- FRAME ARKPRO (Pastikan URL sesuai huruf besar/kecil dengan repo ArkPro Anda) -->
     <div id="frame-arkpro" class="iframe-container w-full h-full absolute inset-0 hidden">
-      <iframe src="https://ferisutrisno151.github.io/ARKPro/" title="ArkPro"></iframe>
+      <iframe src="https://ferisutrisno151.github.io/ArkPro/" title="ArkPro"></iframe>
     </div>
 
   </main>
@@ -154,6 +160,13 @@
         navigator.clipboard.writeText(window.location.href);
         alert('Link AppsPro berhasil disalin ke clipboard!');
       }
+    }
+
+    // Register Service Worker untuk PWA / APK
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js');
+      });
     }
   </script>
 </body>
