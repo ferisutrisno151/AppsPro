@@ -1,7 +1,7 @@
 {
   "name": "AppsPro Portal",
   "short_name": "AppsPro",
-  "description": "Portal Resmi AppsPro untuk LogistikPro & ArkPro Warehouse Management",
+  "description": "Portal Resmi AppsPro - LogistikPro & ArkPro",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
