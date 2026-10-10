@@ -4,37 +4,40 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>AppsPro - Integrated Systems</title>
-  
-  <!-- PWA Settings -->
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="icon-512.png">
-  <meta name="theme-color" content="#0f172a">
-
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
   <style>
-    body { font-family: 'Inter', sans-serif; }
-    .iframe-container iframe { width: 100%; height: 100%; border: none; }
+    body { 
+      font-family: 'Inter', sans-serif; 
+      -webkit-text-size-adjust: 100%;
+    }
+    .iframe-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
 </head>
 <body class="bg-slate-900 text-slate-100 h-screen w-screen overflow-hidden relative">
 
-  <!-- TOMBOL HAMBURGER UTAMA (Z-INDEX 9999 AGAR SELALU DI ATAS IFRAME) -->
-  <button onclick="toggleSidebar()" class="fixed top-2.5 left-2.5 z-[9999] bg-slate-800/90 hover:bg-slate-700 text-white p-2 rounded-lg transition-all shadow-lg border border-slate-700">
+  <!-- TOMBOL HAMBURGER MENU -->
+  <button onclick="toggleSidebar()" class="absolute top-2.5 left-2.5 z-40 bg-slate-800/90 hover:bg-slate-700 text-white p-2 rounded-lg backdrop-blur-md shadow-md border border-slate-700/60 flex items-center justify-center transition-all">
     <i class="fa-solid fa-bars text-base"></i>
   </button>
 
-  <!-- OVERLAY BACKGROUND (LATAR GELAP SAAT MENU TERBUKA) -->
-  <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-[9998] hidden backdrop-blur-xs transition-all"></div>
+  <!-- OVERLAY BACKGROUND -->
+  <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-xs transition-opacity"></div>
 
-  <!-- SIDEBAR MENU (DRAWER UTAMA) -->
-  <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between z-[9999] -translate-x-full transition-transform duration-300">
+  <!-- SIDEBAR OVERLAY / DRAWER -->
+  <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between z-40 transform -translate-x-full transition-transform duration-300 shadow-2xl">
     <div>
       <!-- Header Logo AppsPro -->
-      <div class="p-4 border-b border-slate-800/80 flex items-center justify-between">
+      <div class="p-4 border-b border-slate-800/80 flex items-center justify-between mt-10 sm:mt-0">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white text-sm shadow-md">AP</div>
+          <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white text-sm shadow-md shadow-indigo-500/30">
+            AP
+          </div>
           <div>
             <h1 class="font-bold text-sm tracking-wide text-white">AppsPro</h1>
             <p class="text-[10px] text-slate-400">Portal Sistem Terpadu</p>
@@ -45,48 +48,59 @@
         </button>
       </div>
 
-      <!-- Navigasi Menu AppsPro -->
+      <!-- Navigasi Menu & Tombol Aksi Tepat di Bawahnya -->
       <nav class="p-2.5 space-y-1.5">
-        <button onclick="switchApp('logistikpro')" id="btn-logistikpro" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium bg-indigo-600 text-white">
+        <!-- LogistikPro -->
+        <button onclick="switchApp('logistikpro')" id="btn-logistikpro" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium bg-indigo-600 text-white shadow-sm">
           <i class="fa-solid fa-boxes-packing text-base w-5 text-center"></i>
           <span>LogistikPro</span>
         </button>
 
-        <button onclick="switchApp('arkpro')" id="btn-arkpro" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm text-slate-400 hover:text-white hover:bg-slate-800/60">
+        <!-- ArkPro -->
+        <button onclick="switchApp('arkpro')" id="btn-arkpro" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white">
           <i class="fa-solid fa-screwdriver-wrench text-base w-5 text-center"></i>
           <span>ArkPro</span>
         </button>
 
+        <!-- PEMBATAS & TOMBOL SHARE / DOWNLOAD TEPAT DI BAWAH ARKPRO -->
         <div class="pt-3 pb-1">
           <div class="border-t border-slate-800 my-2"></div>
           <span class="text-[10px] font-semibold text-slate-500 tracking-wider uppercase px-1">Sistem & Bagikan</span>
         </div>
 
-        <button onclick="shareApp()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium">
+        <!-- Tombol Bagikan Link -->
+        <button onclick="shareApp()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-medium transition-all">
           <i class="fa-solid fa-share-nodes"></i>
           <span>Bagikan Link AppsPro</span>
         </button>
 
-        <a href="AppsPro.apk" download class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium">
+        <!-- Tombol Download APK -->
+        <a href="AppsPro.apk" download class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 text-xs font-medium transition-all">
           <i class="fa-solid fa-download"></i>
           <span>Download File APK</span>
         </a>
       </nav>
     </div>
 
-    <div class="p-3 border-t border-slate-800/80 text-center text-[10px] text-slate-500">
-      AppsPro System © 2026
+    <!-- Footer Copyright di Bawah Sendiri -->
+    <div class="p-3 border-t border-slate-800/80 text-[10px] text-slate-500 text-center">
+      AppsPro System &copy; 2026
     </div>
   </aside>
 
-  <!-- KONTEN UTAMA (IFRAME) -->
+  <!-- KONTEN UTAMA (TAMPILAN APLIKASI PENUH) -->
   <main class="w-full h-full relative bg-slate-900">
+    
+    <!-- FRAME LOGISTIKPRO -->
     <div id="frame-logistikpro" class="iframe-container w-full h-full absolute inset-0">
       <iframe src="https://ferisutrisno151.github.io/LogistikPro/" title="LogistikPro"></iframe>
     </div>
+
+    <!-- FRAME ARKPRO -->
     <div id="frame-arkpro" class="iframe-container w-full h-full absolute inset-0 hidden">
-      <iframe src="https://ferisutrisno151.github.io/ArkPro/" title="ArkPro"></iframe>
+      <iframe src="https://ferisutrisno151.github.io/ARKPro/" title="ArkPro"></iframe>
     </div>
+
   </main>
 
   <script>
@@ -107,38 +121,47 @@
     function switchApp(app) {
       const logistikFrame = document.getElementById('frame-logistikpro');
       const arkproFrame = document.getElementById('frame-arkpro');
+      
       const btnLogistik = document.getElementById('btn-logistikpro');
       const btnArkpro = document.getElementById('btn-arkpro');
 
       if (app === 'logistikpro') {
         logistikFrame.classList.remove('hidden');
         arkproFrame.classList.add('hidden');
-        btnLogistik.className = "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium bg-indigo-600 text-white";
-        btnArkpro.className = "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm text-slate-400 hover:text-white hover:bg-slate-800/60";
+
+        btnLogistik.className = "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium bg-indigo-600 text-white shadow-sm";
+        btnArkpro.className = "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white";
       } else if (app === 'arkpro') {
         arkproFrame.classList.remove('hidden');
         logistikFrame.classList.add('hidden');
-        btnArkpro.className = "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium bg-indigo-600 text-white";
-        btnLogistik.className = "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm text-slate-400 hover:text-white hover:bg-slate-800/60";
+
+        btnArkpro.className = "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium bg-purple-600 text-white shadow-sm";
+        btnLogistik.className = "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white";
       }
 
       toggleSidebar();
     }
 
     function shareApp() {
+      const shareData = {
+        title: 'AppsPro Portal',
+        text: 'Silakan akses Portal AppsPro (Logistik & Inventaris Alat) melalui link berikut:',
+        url: window.location.href
+      };
+
       if (navigator.share) {
-        navigator.share({ title: 'AppsPro Portal', url: window.location.href }).catch(() => {});
+        navigator.share(shareData).catch(() => {});
       } else {
         navigator.clipboard.writeText(window.location.href);
-        alert('Link AppsPro berhasil disalin!');
+        alert('Link AppsPro berhasil disalin ke clipboard!');
       }
     }
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js');
-      });
-    }
-  </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js');
+    });
+  }
+</script>
 </body>
 </html>
