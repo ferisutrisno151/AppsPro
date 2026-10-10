@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AppsPro - Integrated Systems</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .iframe-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 h-screen flex overflow-hidden">
+
+  <!-- SIDEBAR UTAMA APPSPRO -->
+  <aside id="sidebar" class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between transition-all duration-300 z-20">
+    <div>
+      <!-- Header Logo AppsPro -->
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-indigo-500/30">
+            AP
+          </div>
+          <div>
+            <h1 class="font-bold text-base tracking-wide text-white">AppsPro</h1>
+            <p class="text-xs text-slate-400">Portal Sistem Terpadu</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigasi Menu Pilihan -->
+      <nav class="p-3 space-y-2">
+        <button onclick="switchApp('logistikpro')" id="btn-logistikpro" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium bg-indigo-600 text-white shadow-md">
+          <i class="fa-solid fa-boxes-packing text-lg w-6 text-center"></i>
+          <span>LogistikPro</span>
+        </button>
+
+        <button onclick="switchApp('arkpro')" id="btn-arkpro" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium text-slate-400 hover:bg-slate-800 hover:text-white">
+          <i class="fa-solid fa-screwdriver-wrench text-lg w-6 text-center"></i>
+          <span>ArkPro</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Footer Sidebar -->
+    <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+      AppsPro System &copy; 2026
+    </div>
+  </aside>
+
+  <!-- KONTEN UTAMA (TAMPILAN APLIKASI) -->
+  <main class="flex-1 h-full relative bg-slate-900">
+    
+    <!-- FRAME LOGISTIKPRO -->
+    <div id="frame-logistikpro" class="iframe-container w-full h-full absolute inset-0">
+      <iframe src="https://ferisutrisno151.github.io/LogistikPro/" title="LogistikPro"></iframe>
+    </div>
+
+    <!-- FRAME ARKPRO -->
+    <div id="frame-arkpro" class="iframe-container w-full h-full absolute inset-0 hidden">
+      <iframe src="https://ferisutrisno151.github.io/ARKPro/" title="ArkPro"></iframe>
+    </div>
+
+  </main>
+
+  <script>
+    function switchApp(app) {
+      const logistikFrame = document.getElementById('frame-logistikpro');
+      const arkproFrame = document.getElementById('frame-arkpro');
+      
+      const btnLogistik = document.getElementById('btn-logistikpro');
+      const btnArkpro = document.getElementById('btn-arkpro');
+
+      if (app === 'logistikpro') {
+        logistikFrame.classList.remove('hidden');
+        arkproFrame.classList.add('hidden');
+
+        btnLogistik.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium bg-indigo-600 text-white shadow-md";
+        btnArkpro.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium text-slate-400 hover:bg-slate-800 hover:text-white";
+      } else if (app === 'arkpro') {
+        arkproFrame.classList.remove('hidden');
+        logistikFrame.classList.add('hidden');
+
+        btnArkpro.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium bg-purple-600 text-white shadow-md";
+        btnLogistik.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium text-slate-400 hover:bg-slate-800 hover:text-white";
+      }
+    }
+  </script>
+</body>
+</html>
