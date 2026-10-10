@@ -21,9 +21,9 @@
 </head>
 <body class="bg-slate-900 text-slate-100 h-screen w-screen overflow-hidden relative">
   
-  <!-- TOMBOL HAMBURGER MENYAMBANG DI KANAN BAWAH -->
-<button onclick="toggleSidebar()" class="fixed bottom-6 right-6 z-[9999] bg-blue-600 hover:bg-blue-500 text-white p-4 rounded-full shadow-2xl flex items-center justify-center transition-all transform hover:scale-105">
-  <i class="fa-solid fa-bars text-xl"></i>
+<!-- TOMBOL HAMBURGER UTAMA APPSPRO (POSISI ASLI) -->
+<button onclick="toggleSidebar()" class="absolute top-2.5 left-2.5 z-40 bg-slate-800/90 hover:bg-slate-700 text-white p-2 rounded-lg transition-all shadow-lg">
+  <i class="fa-solid fa-bars text-base"></i>
 </button>
   <!-- OVERLAY BACKGROUND -->
   <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-xs transition-opacity"></div>
@@ -104,19 +104,18 @@
 
   <script>
     function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebarOverlay');
-      
-      const isOpen = !sidebar.classList.contains('-translate-x-full');
-      if (isOpen) {
-        sidebar.classList.add('-translate-x-full');
-        overlay.classList.add('hidden');
-      } else {
-        sidebar.classList.remove('-translate-x-full');
-        overlay.classList.remove('hidden');
-      }
-    }
-
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  
+  const isOpen = !sidebar.classList.contains('-translate-x-full');
+  if (isOpen) {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+  } else {
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
+  }
+}
     function switchApp(app) {
       const logistikFrame = document.getElementById('frame-logistikpro');
       const arkproFrame = document.getElementById('frame-arkpro');
